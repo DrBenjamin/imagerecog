@@ -1,0 +1,13 @@
+streamlit
+watchdog
+anthropic
+pillow
+starlette
+uvicorn
+httpx
+requests
+pillow
+fastmcp
+dotenv
+ollama
+openai

@@ -1,0 +1,46 @@
+.full-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  z-index: 0;
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  z-index: 10;
+  background-color: #333;
+  padding: 10px;
+  border-radius: 8px;
+}
+.controls button {
+  background-color: black;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.controls button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+}
+.controls button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2);
+}

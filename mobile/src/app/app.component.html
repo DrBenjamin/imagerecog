@@ -1,0 +1,8 @@
+<div *ngIf="buttonsVisible" class="controls">
+  <p></p><p></p>
+  <button (click)="loadQuery(0)">Static Image</button>
+  <button (click)="loadQuery(1)">Variable Image</button>
+  <button (click)="loadQuery(2)">Review Code</button>
+  <button (click)="loadQuery(3)">Image Recognition</button>
+</div>
+<iframe *ngIf="urlSafe" [src]="urlSafe" class="full-frame"></iframe>
