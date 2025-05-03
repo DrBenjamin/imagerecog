@@ -1,7 +1,31 @@
 {
   "dependencies": {
-    "@capacitor/browser": "^7.0.1",
+    "@angular/platform-server": "^19.2.9",
+    "@angular/router": "^19.2.9",
+    "@angular/ssr": "^19.2.10",
+    "@capacitor/browser": "^5.2.1",
     "@capacitor/cli": "^5.7.8",
-    "@capacitor/core": "^5.7.8"
+    "@capacitor/core": "^5.7.8",
+    "@capacitor/ios": "^5.7.8"
+  },
+"scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e",
+    "cap:copy": "npx cap copy",
+    "cap:open:ios": "npx cap open ios"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^19.2.10",
+    "@angular/cli": "^19.2.10",
+    "@angular/common": "^19.2.9",
+    "@angular/compiler": "^19.2.9",
+    "@angular/core": "^19.2.9",
+    "@angular/platform-browser": "^19.2.9",
+    "@angular/platform-browser-dynamic": "^19.2.9",
+    "typescript": "^5.8.3"
   }
 }

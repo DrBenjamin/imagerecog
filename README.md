@@ -161,20 +161,24 @@ To build the app for mobile, use the following commands:
 
 ```bash
 # Preparing the app for mobile
-cd mobile
 npm install @capacitor/core@5.7.8 @capacitor/cli@5.7.8
-npm install @capacitor/ios@5.7.8
 npm install @capacitor/browser@^5 --save
-npx cap init BenBox org.benbox.benbox --webDir=../browser
+npm install @capacitor/ios@5.7.8
+npm install -D typescript
+npx cap init BenBox org.benbox.imagerecog
 npx cap add ios
 # or after platform was already added
 npx cap sync ios
 cd ios/App
 pod install
 
+# Installing 
+npm install @angular-devkit/build-angular @angular/cli @angular/core @angular/common @angular/compiler @angular/platform-browser @angular/platform-browser-dynamic --save-dev  
+npm install @angular/router @angular/platform-server @angular/ssr --save
+
 # Building the app (from project root)
-npm install --prefix mobile
-npm run build --prefix mobile
-npm run cap:copy --prefix mobile
-npm run cap:open:ios --prefix mobile
+npm install
+npm run build
+npm run cap:copy
+npm run cap:open:ios
 ```

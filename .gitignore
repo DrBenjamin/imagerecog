@@ -19,5 +19,8 @@ BenBox.png
 .vscode/settings.json
 LLM_Image_Recognition.md
 node_modules/
-mobile/src/assets/IMG_0048.png
-mobile/src/assets/IMG_0049.png
+src/assets/IMG_0048.png
+src/assets/IMG_0049.png
+src/assets/AppIcon-512@2x.png
+src/assets/BenBox_Logo.png
+package.json

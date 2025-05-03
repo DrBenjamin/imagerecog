@@ -14,10 +14,10 @@ When generating code snippets or explanations, please follow these guidelines:
 
 1. Output always in Markdown.
 2. When referring to a file in this repo, link using `#file:<relative_path>`.
-   - Angular mobile app: [mobile/src/app/app.components.ts](#file:mobile/src/app/app.components.ts)
-   - Streamlit client app: [mobile/app.py](#file:mobile/app.py)
-   - MCPClient class: [mobile/src/client.py](#file:mobile/src/client.py)
-   - MCP server [mobile/src/server.py](#file:mobile/src/server.py)
+   - Angular mobile app: [src/app/app.components.ts](#file:src/app/app.components.ts)
+   - Streamlit client app: [app.py](#file:app.py)
+   - MCPClient class: [src/client.py](#file:src/client.py)
+   - MCP server [src/server.py](#file:src/server.py)
 
 3. Code‑block format for changes or new files:
     ````python
@@ -28,23 +28,28 @@ When generating code snippets or explanations, please follow these guidelines:
     # ...existing code...
     ````
 
-4. Adhere to PEP 8:
+4. Comments format:
+   - Use `#` for comments
+   - Start comments with 'Setting', 'Creating', 'Adding', 'Updating' etc.
+     (always the gerund form)
+
+5. Adhere to PEP 8:
    - 4‑space indentation, snake_case names
    - Imports at the top of the file
    - Docstrings in Google or NumPy style
 
-5. Preserve existing patterns:
+6. Preserve existing patterns:
    - Use `@st.cache_resource` for expensive initializations
    - Store and retrieve state via `st.session_state.get("key", default)`
 
-6. File I/O:
+7. File I/O:
    - Use `os.path.join(...)` and `os.makedirs(..., exist_ok=True)`
    - Handle missing directories before writing files
 
-7. Error handling & logging:
+8. Error handling & logging:
    - Import and configure `logger = logging.getLogger(__name__)`
    - Raise clear exceptions on invalid inputs
 
-8. Testing:
+9. Testing:
     - Add or update tests under `tests/`
     - Use `pytest` fixtures to mock `st.session_state`
