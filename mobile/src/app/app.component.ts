@@ -11,15 +11,20 @@ import { CommonModule } from '@angular/common';
 })
 export class AppComponent {
   title = 'BenBox';
+
   urlSafe: SafeResourceUrl | null = null;
-
   buttonsVisible = true;
-
   baseUrl = 'http://212.227.102.172:8501/?embed=true';
+  ragOnSnowUrl = 'http://212.227.102.172:8502/?embed=true';
 
   loadQuery(query: number): void {
     const url = `${this.baseUrl}&query=${query}`;
     this.urlSafe = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    this.buttonsVisible = false;
+  }
+
+  loadRagOnSnow(): void {
+    this.urlSafe = this.sanitizer.bypassSecurityTrustResourceUrl(this.ragOnSnowUrl);
     this.buttonsVisible = false;
   }
 
