@@ -49,7 +49,7 @@ def fetch_tables_with_retry(snowflake_connection):
             or (err_code == 390114)
             or ("390114" in err_msg)
         ):
-            st.warning("Snowflake-Session abgelaufen. Stelle Verbindung wieder her...")
+            st.toast("Snowflake-Session abgelaufen. Stelle Verbindung wieder her...")
             st.cache_resource.clear()
             snowflake_connection = create_session().connection
             try:

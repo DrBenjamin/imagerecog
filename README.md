@@ -62,10 +62,9 @@ lsof -i :8501
 
 ### Configuration
 
-Change configuration and add the OpenAI API key in the
-`.streamlit/st.secrets.toml` file:
+Change Streamlit configuration in `.streamlit/st.secrets.toml`:
 
-```ini
+```toml
 # LLM Provider
 LLM_LOCAL = "False"  # `False` for local Ollama model, `True` for OpenAI API
 SNOWFLAKE = "True"  # `True` for Snowflake, `False` for PostgreSQL

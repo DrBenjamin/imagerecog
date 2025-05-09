@@ -115,10 +115,6 @@ def _suppress_async_errors(loop, context):
 _mcp_loop.set_exception_handler(_suppress_async_errors)
 logging.getLogger("asyncio").setLevel(logging.ERROR)
 logging.getLogger("anyio").setLevel(logging.ERROR)
-<<<<<<< HEAD
-=======
-
->>>>>>> 9ac9eadc715f6aac784dc21d33e4e7490973c290
 threading.Thread(target=_mcp_loop.run_forever, daemon=True).start()
 
 # Connecting to SSE server on persistent loop and waiting for connection
@@ -204,10 +200,7 @@ def call_mcp_generic(input: str, params: dict={}) -> str:
     # Fallback to string representation
     return str(execution)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 9ac9eadc715f6aac784dc21d33e4e7490973c290
 # Function to list all files one level up and open them
 def show_open_file_button(filename, source, idx):
     # Using the MinIO or Snwoflake stage URL as the download source
@@ -259,19 +252,33 @@ def ensure_output_key_chain(result):
     return result
 
 
-# Menu
-func_choice = st.selectbox(
-    "Select MCP function",
-    (
-        "🌍 Country Code Lookup",
-        "🌌 Static Image",
-        "🏞️ Variable Image",
-        "💻 Review Code",
-        "🩻 Image Recognition",
-        "❄️ Navigator"
-    ),
-    index=st.session_state.query if st.session_state.query else 0,
-)
+# Showing menu just if not angular
+if not st.session_state["IS_EMBED"]:
+    func_choice = st.selectbox(
+        "Select MCP function",
+        (
+            "🌍 Country code Lookup",
+            "🌌 Static Image",
+            "🏞️ Variable Image",
+            "💻 Review Code",
+            "🩻 Image Recognition",
+            "❄️ Navigator"
+        ),
+        index=st.session_state.query if st.session_state.query else 0,
+    )
+else:
+    if st.session_state.query == 0:
+        func_choice = "🌌 Static Image"
+    elif st.session_state.query == 1:
+        func_choice = "🏞️ Variable Image"
+    elif st.session_state.query == 2:
+        func_choice = "💻 Review Code"
+    elif st.session_state.query == 3:
+        func_choice = "🌍 Country code Lookup"
+    elif st.session_state.query == 4:
+        func_choice = "🩻 Image Recognition"
+    elif st.session_state.query == 5:
+        func_choice = "❄️ Navigator"
 
 if func_choice == "🌌 Static Image":
     st.title("🌌 Static Image")
@@ -315,8 +322,8 @@ elif func_choice == "💻 Review Code":
         st.write("**Review Feedback:**")
         st.code(feedback)
 
-elif func_choice == "🌍 Country Code Lookup":
-    st.title("🌍 Country Code Lookup")
+elif func_choice == "🌍 Country code Lookup":
+    st.title("🌍 Country code Lookup")
     with st.form("country_code_form"):
         country_code = st.text_input("Country Code")
         submitted = st.form_submit_button("Lookup Country Code")
