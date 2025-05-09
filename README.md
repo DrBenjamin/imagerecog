@@ -68,6 +68,7 @@ Change configuration and add the OpenAI API key in the
 ```ini
 # LLM Provider
 LLM_LOCAL = "False"  # `False` for local Ollama model, `True` for OpenAI API
+SNOWFLAKE = "True"  # `True` for Snowflake, `False` for PostgreSQL
 
 # MCP API
 [MCP]
@@ -86,6 +87,41 @@ AZURE_OPENAI_API_KEY = "<your-azure-openai-api-key>"
 AZURE_OPENAI_ENDPOINT = "<your-azure-openai-endpoint>"
 AZURE_OPENAI_MODEL = "<your-azure-openai-model>" # e.g. gpt-4.1
 AZURE_OPENAI_API_VERSION = "<your-api-version>" # e.g. 2024-02-15-preview
+
+# Configuring LLM
+[LLM]
+LLM_CHATBOT_NAME = "<chatbot_name>"
+LLM_SYSTEM = "Please write a short answer."
+LLM_SYSTEM_PLUS = "Prioritize the most relevant information from the similarity search!"
+LLM_ASSISTANT = "How can I help?"
+LLM_USER_EXAMPLE = "<user_example>"
+LLM_ASSISTANT_EXAMPLE = "<>assistant_example>"
+
+# Configuring Snowflake
+[snowflake]
+user = "<user_name>"
+account = "<account_name>"
+private_key_file = "<path to rsa_key.p8>"
+role = "<role_name>"
+warehouse = "<warehouse_name>"
+database = "<database_name>"
+schema = "<schema_name>"
+
+# Configuring PostgreSQL
+[psotgresql]
+user = "<user_name>"
+password = "<password>"
+host = "<host_name>"
+port = "<port_number>"
+database = "<database_name>"
+table = "<table_name>"
+
+# Configuring MinIO storage
+[MinIO]
+endpoint = "http://127.0.0.1:9000"
+bucket = "<bucket_name>"
+access_key = "<access_key>"
+secret_key = "<secret_key>"
 ```
 
 ### Ollama

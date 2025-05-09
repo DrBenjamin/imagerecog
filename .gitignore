@@ -1,6 +1,8 @@
 env
 .DS_Store
 .streamlit
+.snowflake
+
 dist/
 ios/
 android/

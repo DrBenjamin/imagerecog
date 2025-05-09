@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Copilot Instructions for imagerecog
+=======
+# Copilot Instructions for BenBox
+>>>>>>> 9ac9eadc715f6aac784dc21d33e4e7490973c290
 
 Dearest Copilot,
 this project is an Agent AI app utilizing
