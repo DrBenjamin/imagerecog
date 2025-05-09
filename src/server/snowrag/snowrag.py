@@ -1,5 +1,5 @@
 ### `src/server/snowrag/snowrag.py`
-### Embedding class for Snowflake
+### Snowflake RAG on Snow MCP tool
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 import os
