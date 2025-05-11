@@ -281,7 +281,8 @@ else:
         func_choice = "❄️ Navigator"
 
 if func_choice == "🌌 Static Image":
-    st.title("🌌 Static Image")
+    if not st.session_state["IS_EMBED"]:
+        st.title("🌌 Static Image")
     if st.button("Fetch Image"):
         with st.spinner("Fetching image from MCP..."):
             response = call_mcp_generic("Static image file")
@@ -297,7 +298,8 @@ if func_choice == "🌌 Static Image":
             st.error(f"Failed to display image: {e}")
 
 elif func_choice == "🏞️ Variable Image":
-    st.title("🏞️ Variable Image")
+    if not st.session_state["IS_EMBED"]:
+        st.title("🏞️ Variable Image")
     image_name = st.text_input("Enter image name", value="Image.png")
     if st.button("Fetch Variable Image"):
         with st.spinner("Fetching image from MCP..."):
@@ -314,7 +316,8 @@ elif func_choice == "🏞️ Variable Image":
             st.error(f"Failed to display image: {e}")
 
 elif func_choice == "💻 Review Code":
-    st.title("💻 Review Code")
+    if not st.session_state["IS_EMBED"]:
+        st.title("💻 Review Code")
     code_input = st.text_area("Enter code to review")
     if st.button("Review"):
         with st.spinner("Reviewing code via MCP..."):
@@ -323,7 +326,8 @@ elif func_choice == "💻 Review Code":
         st.code(feedback)
 
 elif func_choice == "🌍 Country code Lookup":
-    st.title("🌍 Country code Lookup")
+    if not st.session_state["IS_EMBED"]:
+        st.title("🌍 Country code Lookup")
     with st.form("country_code_form"):
         country_code = st.text_input("Country Code")
         submitted = st.form_submit_button("Lookup Country Code")
@@ -349,7 +353,8 @@ elif func_choice == "🌍 Country code Lookup":
                     st.error(f"Lookup failed: {e}")
 
 elif func_choice == "🩻 Image Recognition":
-    st.title("🩻 Image Recognition")
+    if not st.session_state["IS_EMBED"]:
+        st.title("🩻 Image Recognition")
     uploaded = st.file_uploader(
         "Upload an image to thumbnail", type=["png", "jpg", "jpeg"]
     )

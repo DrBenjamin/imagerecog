@@ -18,7 +18,7 @@ All notable changes to the Agentic AI app.
         - get a description of an image
             - Ollama (locally) or OpenAI (remote)
         - get a thumbnail of an image
-- Added Streamlit dev app
+- Added Streamlit client app
         - converts country code into country name
         - displays the static image
         - displays the variant image
@@ -27,6 +27,10 @@ All notable changes to the Agentic AI app.
             - displays the image description
             - displays the image as thumbnail
         - RAG chatbot
+- Added RAG chatbot
+    - vector database
+        - Snowflake
+    - MinIO storage
 
 [0.1.0]
 - Initial release
