@@ -11,6 +11,8 @@ fastmcp
 dotenv
 ollama
 openai
+openai-agents
+azure-identity
 mysql-connector-python
 cryptography
 snowflake  

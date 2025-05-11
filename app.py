@@ -7,23 +7,28 @@ import base64
 import threading
 import asyncio
 import io
-import json
 import logging
 import sys
 import time
 import os
-import io
 import requests
+import io
 import json
 import fnmatch
 import logging
 import warnings
+import asyncio
 from PIL import Image
 from src.client import MCPClient
 from typing import Union
 from src.server.snowrag.vectorstores import SnowflakeVectorStore
 from src.server.snowrag.llms import Cortex
 from src.server.snowrag.embedding import SnowflakeEmbeddings
+from openai import AsyncAzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+from azure.keyvault.secrets import SecretClient
+from openai import AzureOpenAI
+from agents import Agent, Runner, set_tracing_disabled, set_default_openai_client
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -262,7 +267,8 @@ if not st.session_state["IS_EMBED"]:
             "🏞️ Variable Image",
             "💻 Review Code",
             "🩻 Image Recognition",
-            "❄️ Navigator"
+            "❄️ Navigator",
+            "🤖 OpenAI Agents"
         ),
         index=st.session_state.query if st.session_state.query else 0,
     )
@@ -279,6 +285,8 @@ else:
         func_choice = "🩻 Image Recognition"
     elif st.session_state.query == 5:
         func_choice = "❄️ Navigator"
+    else:
+        func_choice = "🤖 OpenAI Agents"
 
 if func_choice == "🌌 Static Image":
     if not st.session_state["IS_EMBED"]:
@@ -767,3 +775,85 @@ elif func_choice == "❄️ Navigator":
     else:
         if selected_disp == "Erstelle neue Tabelle":
             st.info("Bitte integriere zuerst Dokumente, um eine Vektorbank zu erstellen.")
+
+elif func_choice == "🤖 OpenAI Agents":
+    if not st.session_state["IS_EMBED"]:
+        st.title("🤖 OpenAI Agents")
+
+    # # Creating OpenAI client using Azure OpenAI
+    # openai_client = AsyncAzureOpenAI(
+    #    api_key=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_API_KEY"],
+    #    api_version=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_API_VERSION"],
+    #    azure_endpoint=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_ENDPOINT"],
+    #    azure_deployment=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_DEPLOYMENT"]
+    # )
+
+    # Initializing Azure OpenAI client with entra-id authentication
+    try:
+        # Setting up Azure AD token provider
+        token_provider = get_bearer_token_provider(
+            DefaultAzureCredential(),
+            "https://cognitiveservices.azure.com/.default"
+        )
+        client = AzureOpenAI(
+            azure_ad_token_provider=token_provider,
+            azure_endpoint=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_ENDPOINT"],
+            api_version=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_API_VERSION"]
+        )
+
+        assistant = client.beta.assistants.create(
+            model="gpt-4o",  # replace with model deployment name
+            name="Assistant968",
+            instructions="",
+            tools=[],
+            tool_resources={},
+            temperature=1,
+            top_p=1
+        )
+
+        print(f"Assistant created: {assistant}")
+    except Exception as e:
+        # Showing a clear error if Azure authentication fails
+        st.error(
+            "Azure authentication failed. Please ensure you are logged in with the Azure CLI or have set the required environment variables. "
+            "See https://aka.ms/azsdk/python/identity/defaultazurecredential/troubleshoot for help.\n\n"
+            f"Details: {e}"
+        )
+
+    # Creating a thread
+    thread = client.beta.threads.create()
+
+    # Adding a user question to the thread
+    message = client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content="Hi, please give me the current time." # Replace this with your prompt
+    )
+
+    # Running the thread
+    run = client.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=assistant.id
+    )
+
+    # Looping until the run completes or fails
+    while run.status in ['queued', 'in_progress', 'cancelling']:
+        time.sleep(1)
+        run = client.beta.threads.runs.retrieve(
+            thread_id=thread.id,
+            run_id=run.id
+    )
+
+    if run.status == 'completed':
+        messages = client.beta.threads.messages.list(
+            thread_id=thread.id
+        )
+        # Updating: Converting each message to a dict for display
+        message_dicts = [m.model_dump() for m in messages.data]
+        st.json(message_dicts)
+    elif run.status == 'requires_action':
+        # the assistant requires calling some functions
+        # and submit the tool outputs back to the run
+        pass
+    else:
+        st.write(run.status)

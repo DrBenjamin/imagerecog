@@ -60,6 +60,17 @@ lsof -i :8080
 lsof -i :8501
 ```
 
+## Setup of Azure
+
+To configure the Azure OpenAI API, you need to install the Azure CLI and
+Azure Dev CLI. Use the following commands to install them:
+
+```bash
+brew tap azure/azd && brew install azd && brew install azure-cli
+az login
+azd auth login
+```
+
 ### Configuration
 
 Change Streamlit configuration in `.streamlit/st.secrets.toml`:
