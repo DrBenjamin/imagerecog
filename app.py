@@ -27,6 +27,7 @@ from src.server.snowrag.embedding import SnowflakeEmbeddings
 from openai import AsyncAzureOpenAI
 from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from azure.keyvault.secrets import SecretClient
+from azure.ai.projects import AIProjectClient
 from openai import AzureOpenAI
 from agents import Agent, Runner, set_tracing_disabled, set_default_openai_client
 from langchain.chains.combine_documents import create_stuff_documents_chain
@@ -780,80 +781,24 @@ elif func_choice == "🤖 OpenAI Agents":
     if not st.session_state["IS_EMBED"]:
         st.title("🤖 OpenAI Agents")
 
-    # # Creating OpenAI client using Azure OpenAI
-    # openai_client = AsyncAzureOpenAI(
-    #    api_key=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_API_KEY"],
-    #    api_version=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_API_VERSION"],
-    #    azure_endpoint=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_ENDPOINT"],
-    #    azure_deployment=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_DEPLOYMENT"]
-    # )
+    # Getting user input
+    user_input = st.text_input("Enter your message", value="Hi, I need some investment tips.")
 
-    # Initializing Azure OpenAI client with entra-id authentication
-    try:
-        # Setting up Azure AD token provider
-        token_provider = get_bearer_token_provider(
-            DefaultAzureCredential(),
-            "https://cognitiveservices.azure.com/.default"
-        )
-        client = AzureOpenAI(
-            azure_ad_token_provider=token_provider,
-            azure_endpoint=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_ENDPOINT"],
-            api_version=st.secrets["AZURE_OPENAI"]["AZURE_OPENAI_AGENT_API_VERSION"]
-        )
-
-        assistant = client.beta.assistants.create(
-            model="gpt-4o",  # replace with model deployment name
-            name="Assistant968",
-            instructions="",
-            tools=[],
-            tool_resources={},
-            temperature=1,
-            top_p=1
-        )
-
-        print(f"Assistant created: {assistant}")
-    except Exception as e:
-        # Showing a clear error if Azure authentication fails
-        st.error(
-            "Azure authentication failed. Please ensure you are logged in with the Azure CLI or have set the required environment variables. "
-            "See https://aka.ms/azsdk/python/identity/defaultazurecredential/troubleshoot for help.\n\n"
-            f"Details: {e}"
-        )
-
-    # Creating a thread
-    thread = client.beta.threads.create()
-
-    # Adding a user question to the thread
-    message = client.beta.threads.messages.create(
-        thread_id=thread.id,
-        role="user",
-        content="Hi, please give me the current time." # Replace this with your prompt
-    )
-
-    # Running the thread
-    run = client.beta.threads.runs.create(
-        thread_id=thread.id,
-        assistant_id=assistant.id
-    )
-
-    # Looping until the run completes or fails
-    while run.status in ['queued', 'in_progress', 'cancelling']:
-        time.sleep(1)
-        run = client.beta.threads.runs.retrieve(
+    # Creating a button to send the message
+    if st.button("Send"):
+        project_client = AIProjectClient.from_connection_string(
+            credential=DefaultAzureCredential(),
+            conn_str="swedencentral.api.azureml.ms;fe22c842-64d1-4cb3-b434-bf57d79bf16f;elearning;benbox-agent")
+        agent = project_client.agents.get_agent("asst_vwh5p1wdRyyJR4qLFKhpAXCI")
+        thread = project_client.agents.get_thread("thread_zQB0giXCGeB6LMfO4GvUxGk1")
+        message = project_client.agents.create_message(
             thread_id=thread.id,
-            run_id=run.id
-    )
-
-    if run.status == 'completed':
-        messages = client.beta.threads.messages.list(
-            thread_id=thread.id
+            role="user",
+            content=user_input
         )
-        # Updating: Converting each message to a dict for display
-        message_dicts = [m.model_dump() for m in messages.data]
-        st.json(message_dicts)
-    elif run.status == 'requires_action':
-        # the assistant requires calling some functions
-        # and submit the tool outputs back to the run
-        pass
-    else:
-        st.write(run.status)
+        run = project_client.agents.create_and_process_run(
+            thread_id=thread.id,
+            agent_id=agent.id)
+        messages = project_client.agents.list_messages(thread_id=thread.id)
+        for text_message in messages.text_messages:
+            st.write(text_message.as_dict())

@@ -12,6 +12,7 @@ dotenv
 ollama
 openai
 openai-agents
+azure-ai-projects
 azure-identity
 mysql-connector-python
 cryptography
