@@ -3,7 +3,6 @@
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 from mcp.server.fastmcp import FastMCP
-from fastapi.staticfiles import StaticFiles
 
 # Initializing FastMCP server with prompt capabilities (SSE)
 mcp = FastMCP(
@@ -18,7 +17,6 @@ mcp = FastMCP(
             }
         }
 )
-mcp.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 # Importing all tool modules to ensure MCP tool registration
 from . import get_static_image
@@ -26,4 +24,4 @@ from . import get_variable_image
 from . import review_code
 from . import image_recognition
 from . import get_country_name
-from . import rag_on_snow 
+from . import rag_on_snow

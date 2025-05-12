@@ -12,7 +12,7 @@ from starlette.requests import Request
 from starlette.routing import Mount, Route
 from mcp.server import Server
 from server import mcp
-import server
+from starlette.staticfiles import StaticFiles
 
 # Choosing between Ollama (local) and OpenAI API
 ollama = ast.literal_eval(f"{st.secrets['LLM_LOCAL']}")
@@ -47,6 +47,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
         routes=[
             Route("/sse", endpoint=handle_sse),
             Mount("/messages/", app=sse.handle_post_message),
+            Mount("/", app=StaticFiles(directory="static", html=True), name="static"),
         ],
     )
 
