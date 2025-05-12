@@ -780,19 +780,16 @@ elif func_choice == "🤖 OpenAI Agents":
     if not st.session_state["IS_EMBED"]:
         st.title("🤖 OpenAI Agents")
 
-    # Getting user input
-    user_input = st.text_input("Enter your message",
-                               value="Hello, please get the country name for 'DE'")
+    user_input_1 = st.text_input("Agent 1: Enter your message", value="Hello, please get the country name for 'DE'")
+    user_input_2 = st.text_input("Agent 2: Enter your message", value="What is the weather in London?")
 
-    if st.button("Send"):
+    if st.button("Send to both agents"):
         # Setting up Azure AIProjectClient
         project_client = AIProjectClient.from_connection_string(
             credential=DefaultAzureCredential(),
             conn_str="swedencentral.api.azureml.ms;fe22c842-64d1-4cb3-b434-bf57d79bf16f;elearning;benbox-agent"
         )
         toolset = ToolSet()
-
-        # Loading OpenAPI spec from MCP server
         mcp_openapi_url = "http://212.227.102.172:8080/openapi.json"
         try:
             response = requests.get(mcp_openapi_url)
@@ -801,7 +798,6 @@ elif func_choice == "🤖 OpenAI Agents":
         except Exception as e:
             st.error(f"Failed to load MCP OpenAPI spec: {e}")
 
-        # Creating OpenApiTool with live spec
         mcp_openapi_tool = OpenApiTool(
             name="mcp_tools",
             spec=mcp_openapi_spec,
@@ -810,37 +806,60 @@ elif func_choice == "🤖 OpenAI Agents":
         )
         toolset.add(mcp_openapi_tool)
 
-        # Creating the agent with only the MCP OpenAPI tool
-        agent = project_client.agents.create_agent(
+        # Creating Agent 1
+        agent1 = project_client.agents.create_agent(
             model="gpt-4o-mini",
-            name="Mr. Smith",
-            instructions="You are an agent. Don't use MCP tools provided via OpenAPI to answer questions."
-            #toolset=toolset
+            name="Agent One",
+            instructions="You are Agent One. Don't use the MCP tools provided via OpenAPI.",
+            #toolset=toolset,
         )
-        st.toast(f"Created agent, ID: {agent.id}")
+        st.toast(f"Created agent 1, ID: {agent1.id}")
 
-        # Creating a thread for interaction
-        thread = project_client.agents.create_thread()
-        st.toast(f"Created thread, ID: {thread.id}")
+        # Creating Agent 2
+        agent2 = project_client.agents.create_agent(
+            model="gpt-4o-mini",
+            name="Agent Two",
+            instructions="You are Agent Two. Use only the MCP tools provided via OpenAPI.",
+            toolset=toolset,
+        )
+        st.toast(f"Created agent 2, ID: {agent2.id}")
 
-        # Creating message for the agent
-        message = project_client.agents.create_message(
-            thread_id=thread.id,
+        # Creating threads for both agents
+        thread1 = project_client.agents.create_thread()
+        thread2 = project_client.agents.create_thread()
+        st.toast(f"Created threads: {thread1.id}, {thread2.id}")
+
+        # Sending messages to both agents
+        message1 = project_client.agents.create_message(
+            thread_id=thread1.id,
             role="user",
-            content=user_input
+            content=user_input_1
         )
-        st.toast(f"Created message, ID: {message.id}")
-
-        # Running the agent
-        run = project_client.agents.create_and_process_run(
-            thread_id=thread.id,
-            agent_id=agent.id
+        message2 = project_client.agents.create_message(
+            thread_id=thread2.id,
+            role="user",
+            content=user_input_2
         )
-        st.toast(f"Run finished with status: {run.status}")
 
-        # Cleaning up agent
-        project_client.agents.delete_agent(agent.id)
+        # Running both agents
+        run1 = project_client.agents.create_and_process_run(
+            thread_id=thread1.id,
+            agent_id=agent1.id
+        )
+        run2 = project_client.agents.create_and_process_run(
+            thread_id=thread2.id,
+            agent_id=agent2.id
+        )
+        st.toast(f"Runs finished: {run1.status}, {run2.status}")
 
-        # Listing all messages in the thread
-        messages = project_client.agents.list_messages(thread_id=thread.id)
-        st.json([msg.as_dict() for msg in messages.text_messages])
+        # Cleaning up agents
+        project_client.agents.delete_agent(agent1.id)
+        project_client.agents.delete_agent(agent2.id)
+
+        # Listing all messages in both threads
+        messages1 = project_client.agents.list_messages(thread_id=thread1.id)
+        messages2 = project_client.agents.list_messages(thread_id=thread2.id)
+        st.subheader("Agent 1 Response")
+        st.json([msg.as_dict() for msg in messages1.text_messages])
+        st.subheader("Agent 2 Response")
+        st.json([msg.as_dict() for msg in messages2.text_messages])
