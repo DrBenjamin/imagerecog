@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Get Country Name API",
+    "title": "BenBox MCP Tools API",
     "version": "1.0.0",
-    "description": "Retrieve country name based on input code."
+    "description": "OpenAPI spec for all MCP tools available in BenBox."
   },
   "servers": [
     {
@@ -11,6 +11,143 @@
     }
   ],
   "paths": {
+    "/get_static_image": {
+      "get": {
+        "summary": "Get Static Image",
+        "operationId": "getStaticImage",
+        "parameters": [
+          {
+            "name": "image_id",
+            "in": "query",
+            "required": true,
+            "description": "ID of the static image.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "image_url": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/get_variable_image": {
+      "get": {
+        "summary": "Get Variable Image",
+        "operationId": "getVariableImage",
+        "parameters": [
+          {
+            "name": "prompt",
+            "in": "query",
+            "required": true,
+            "description": "Prompt for image generation.",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Generated image data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "image_url": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/review_code": {
+      "post": {
+        "summary": "Review Code",
+        "operationId": "reviewCode",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": { "type": "string" },
+                  "language": { "type": "string" }
+                },
+                "required": ["code", "language"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Code review result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "review": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/image_recognition": {
+      "post": {
+        "summary": "Image Recognition",
+        "operationId": "imageRecognition",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "image_file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["image_file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Recognition result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "labels": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/get_country_name": {
       "get": {
         "summary": "Get Country Name",
@@ -21,9 +158,7 @@
             "in": "query",
             "required": true,
             "description": "The country code (ISO 3166-1).",
-            "schema": {
-              "type": "string"
-            }
+            "schema": { "type": "string" }
           }
         ],
         "responses": {
@@ -48,11 +183,46 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid input"
-          },
-          "404": {
-            "description": "Country not found"
+          "400": { "description": "Invalid input" },
+          "404": { "description": "Country not found" }
+        }
+      }
+    },
+    "/rag_on_snow": {
+      "post": {
+        "summary": "RAG on Snowflake",
+        "operationId": "ragOnSnow",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": { "type": "string" }
+                },
+                "required": ["query"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "RAG result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "answer": { "type": "string" },
+                    "context": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
