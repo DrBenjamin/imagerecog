@@ -66,9 +66,25 @@ To configure the Azure OpenAI API, you need to install the Azure CLI and
 Azure Dev CLI. Use the following commands to install them:
 
 ```bash
+# Installing Azure CLI and Azure Dev CLI
+# Azure Cli on Mac
 brew tap azure/azd && brew install azd && brew install azure-cli
+
+# Azure Cli on Linux
+apt-get install -y azure-cli
+
+# Download and run the install script for Azure Developer CLI
+curl -fsSL https://aka.ms/install-azd.sh | bash
+
+# Logging in to Azure
 az login
+# or on remote
+az login --use-device-code
+
+# Using Azure Dev CLI
 azd auth login
+# or on remote
+azd auth login --use-device-code
 ```
 
 ### Configuration
