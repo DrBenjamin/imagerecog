@@ -158,7 +158,9 @@
             "in": "query",
             "required": true,
             "description": "The country code (ISO 3166-1).",
-            "schema": { "type": "string" }
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -183,8 +185,12 @@
               }
             }
           },
-          "400": { "description": "Invalid input" },
-          "404": { "description": "Country not found" }
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "Country not found"
+          }
         }
       }
     },
