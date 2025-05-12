@@ -811,9 +811,19 @@ elif func_choice == "🤖 OpenAI Agents":
         toolset = ToolSet()
         toolset.add(functions)
 
+        # Loading OpenAPI spec as a dictionary
+        mcp_openapi_url = "http://212.227.102.172:8080/openapi.json"
+        try:
+            response = requests.get(mcp_openapi_url)
+            response.raise_for_status()
+            mcp_openapi_spec = response.json()
+        except Exception as e:
+            st.error(f"Failed to load MCP OpenAPI spec: {e}")
+            mcp_openapi_spec = {}
+
         mcp_openapi_tool = OpenApiTool(
             name="mcp_tools",
-            spec="http://212.227.102.172:8080/openapi.json",
+            spec=mcp_openapi_spec,
             description="MCP tools",
             auth=OpenApiAnonymousAuthDetails()
         )
