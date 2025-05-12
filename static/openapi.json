@@ -40,7 +40,7 @@
           }
         }
       }
-    },
+    }
     "/get_variable_image": {
       "get": {
         "summary": "Get Variable Image",

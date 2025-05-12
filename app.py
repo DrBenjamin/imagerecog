@@ -779,39 +779,20 @@ elif func_choice == "❄️ Navigator":
 elif func_choice == "🤖 OpenAI Agents":
     if not st.session_state["IS_EMBED"]:
         st.title("🤖 OpenAI Agents")
-    def fetch_weather(location: str) -> str:
-        """
-        Fetches the weather information for the specified location.
-
-        :param location (str): The location to fetch weather for.
-        :return: Weather information as a JSON string.
-        :rtype: str
-        """
-        # In a real-world scenario, you'd integrate with a weather API.
-        # Here, we'll mock the response.
-        mock_weather_data = {"New York": "Sunny, 25°C", "London": "Cloudy, 18°C", "Tokyo": "Rainy, 22°C"}
-        weather = mock_weather_data.get(location, "Weather data not available for this location.")
-        weather_json = json.dumps({"weather": weather})
-        return weather_json
 
     # Getting user input
     user_input = st.text_input("Enter your message",
-                               value="Hello, please get the datetime and weather information of New York?")
+                               value="Hello, please get the country name for 'DE'")
 
-    # Creating a button to send the message
     if st.button("Send"):
-        # Initializing the Azure project client  
-        project_client = AIProjectClient.from_connection_string(  
-            credential=DefaultAzureCredential(),  
-            conn_str="swedencentral.api.azureml.ms;fe22c842-64d1-4cb3-b434-bf57d79bf16f;elearning;benbox-agent"  
+        # Setting up Azure AIProjectClient
+        project_client = AIProjectClient.from_connection_string(
+            credential=DefaultAzureCredential(),
+            conn_str="swedencentral.api.azureml.ms;fe22c842-64d1-4cb3-b434-bf57d79bf16f;elearning;benbox-agent"
         )
-        
-        # Initialize agent toolset with user functions
-        functions = FunctionTool(user_functions)
         toolset = ToolSet()
-        toolset.add(functions)
 
-        # Loading OpenAPI spec as a dictionary
+        # Loading OpenAPI spec from MCP server
         mcp_openapi_url = "http://212.227.102.172:8080/openapi.json"
         try:
             response = requests.get(mcp_openapi_url)
@@ -819,8 +800,8 @@ elif func_choice == "🤖 OpenAI Agents":
             mcp_openapi_spec = response.json()
         except Exception as e:
             st.error(f"Failed to load MCP OpenAPI spec: {e}")
-            mcp_openapi_spec = {}
 
+        # Creating OpenApiTool with live spec
         mcp_openapi_tool = OpenApiTool(
             name="mcp_tools",
             spec=mcp_openapi_spec,
@@ -829,38 +810,37 @@ elif func_choice == "🤖 OpenAI Agents":
         )
         toolset.add(mcp_openapi_tool)
 
-        # Creating Auth object for the OpenApiTool  
-        auth = OpenApiAnonymousAuthDetails()  
-
-        # Getting the agent from your Azure project  
+        # Creating the agent with only the MCP OpenAPI tool
         agent = project_client.agents.create_agent(
             model="gpt-4o-mini",
             name="Mr. Smith",
-            instructions="You are a weather bot. Use the provided functions to help answer questions.",
-            toolset=toolset
+            instructions="You are an agent. Don't use MCP tools provided via OpenAPI to answer questions."
+            #toolset=toolset
         )
         st.toast(f"Created agent, ID: {agent.id}")
 
-        # Creating a thread for interaction  
-        thread = project_client.agents.create_thread()  
+        # Creating a thread for interaction
+        thread = project_client.agents.create_thread()
         st.toast(f"Created thread, ID: {thread.id}")
 
-        # Creating message to invoke get_country_name  
-        message = project_client.agents.create_message(  
-            thread_id=thread.id,  
-            role="user",  
-            content=user_input  
+        # Creating message for the agent
+        message = project_client.agents.create_message(
+            thread_id=thread.id,
+            role="user",
+            content=user_input
         )
         st.toast(f"Created message, ID: {message.id}")
 
-        # Creating and process the run using the agent  
-        run = project_client.agents.create_and_process_run(  
-            thread_id=thread.id,  
-            agent_id=agent.id  
+        # Running the agent
+        run = project_client.agents.create_and_process_run(
+            thread_id=thread.id,
+            agent_id=agent.id
         )
         st.toast(f"Run finished with status: {run.status}")
+
+        # Cleaning up agent
         project_client.agents.delete_agent(agent.id)
 
-        # Listing all messages in the thread, including the response from get_country_name  
+        # Listing all messages in the thread
         messages = project_client.agents.list_messages(thread_id=thread.id)
         st.json([msg.as_dict() for msg in messages.text_messages])
