@@ -12,14 +12,14 @@ logger = logging.getLogger(__name__)
 @mcp.tool()
 async def get_country_name(country_code: str = None) -> str:
     """
-    Getting the country name for  a given country code.
+    Getting the country name for a given country code.
 
     Args:
         country_code(str): The country code to look up.
 
 
     Returns:
-        str: The country full name in english.
+        str: The country full name in german.
 
     Raises:
         ValueError: If no matching country is found.

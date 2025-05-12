@@ -1,0 +1,60 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Get Country Name API",
+    "version": "1.0.0",
+    "description": "Retrieve country name based on input code."
+  },
+  "servers": [
+    {
+      "url": "http://212.227.102.172:8080"
+    }
+  ],
+  "paths": {
+    "/get_country_name": {
+      "get": {
+        "summary": "Get Country Name",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "description": "The country code (ISO 3166-1).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "The name of the country in german."
+                    },
+                    "code": {
+                      "type": "string",
+                      "description": "The country code provided."
+                    }
+                  },
+                  "required": ["name", "code"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          },
+          "404": {
+            "description": "Country not found"
+          }
+        }
+      }
+    }
+  }
+}

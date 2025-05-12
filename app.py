@@ -18,18 +18,16 @@ import fnmatch
 import logging
 import warnings
 import asyncio
+from typing import List, Union
 from PIL import Image
 from src.client import MCPClient
-from typing import Union
 from src.server.snowrag.vectorstores import SnowflakeVectorStore
 from src.server.snowrag.llms import Cortex
 from src.server.snowrag.embedding import SnowflakeEmbeddings
-from openai import AsyncAzureOpenAI
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-from azure.keyvault.secrets import SecretClient
+from azure.identity import DefaultAzureCredential
+from azure.ai.projects.models import OpenApiAnonymousAuthDetails, FunctionTool, ToolSet, OpenApiTool
 from azure.ai.projects import AIProjectClient
-from openai import AzureOpenAI
-from agents import Agent, Runner, set_tracing_disabled, set_default_openai_client
+from src.server.user_functions import user_functions
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -102,7 +100,8 @@ if "IS_EMBED" not in st.session_state:
 _mcp_client = MCPClient()
 
 # Ensuring we connect to the proper SSE endpoint
-mcp_base_url = st.secrets["MCP"]["MCP_URL"].rstrip("/")
+# Setting MCP tool endpoint to the provided URL
+mcp_base_url = "http://212.227.102.172:8080"
 sse_url = f"{mcp_base_url}/sse"
 
 # Creating persistent event loop for MCP client
@@ -780,25 +779,78 @@ elif func_choice == "❄️ Navigator":
 elif func_choice == "🤖 OpenAI Agents":
     if not st.session_state["IS_EMBED"]:
         st.title("🤖 OpenAI Agents")
+    def fetch_weather(location: str) -> str:
+        """
+        Fetches the weather information for the specified location.
+
+        :param location (str): The location to fetch weather for.
+        :return: Weather information as a JSON string.
+        :rtype: str
+        """
+        # In a real-world scenario, you'd integrate with a weather API.
+        # Here, we'll mock the response.
+        mock_weather_data = {"New York": "Sunny, 25°C", "London": "Cloudy, 18°C", "Tokyo": "Rainy, 22°C"}
+        weather = mock_weather_data.get(location, "Weather data not available for this location.")
+        weather_json = json.dumps({"weather": weather})
+        return weather_json
 
     # Getting user input
-    user_input = st.text_input("Enter your message", value="Hi, I need some investment tips.")
+    user_input = st.text_input("Enter your message",
+                               value="Hello, please get the datetime and weather information of New York?")
 
     # Creating a button to send the message
     if st.button("Send"):
-        project_client = AIProjectClient.from_connection_string(
-            credential=DefaultAzureCredential(),
-            conn_str="swedencentral.api.azureml.ms;fe22c842-64d1-4cb3-b434-bf57d79bf16f;elearning;benbox-agent")
-        agent = project_client.agents.get_agent("asst_vwh5p1wdRyyJR4qLFKhpAXCI")
-        thread = project_client.agents.get_thread("thread_zQB0giXCGeB6LMfO4GvUxGk1")
-        message = project_client.agents.create_message(
-            thread_id=thread.id,
-            role="user",
-            content=user_input
+        # Initializing the Azure project client  
+        project_client = AIProjectClient.from_connection_string(  
+            credential=DefaultAzureCredential(),  
+            conn_str="swedencentral.api.azureml.ms;fe22c842-64d1-4cb3-b434-bf57d79bf16f;elearning;benbox-agent"  
         )
-        run = project_client.agents.create_and_process_run(
-            thread_id=thread.id,
-            agent_id=agent.id)
+        
+        # Initialize agent toolset with user functions
+        functions = FunctionTool(user_functions)
+        toolset = ToolSet()
+        toolset.add(functions)
+
+        mcp_openapi_tool = OpenApiTool(
+            name="mcp_tools",
+            spec="http://212.227.102.172:8080/openapi.json",
+            description="MCP tools",
+            auth=OpenApiAnonymousAuthDetails()
+        )
+        toolset.add(mcp_openapi_tool)
+
+        # Creating Auth object for the OpenApiTool  
+        auth = OpenApiAnonymousAuthDetails()  
+
+        # Getting the agent from your Azure project  
+        agent = project_client.agents.create_agent(
+            model="gpt-4o-mini",
+            name="Mr. Smith",
+            instructions="You are a weather bot. Use the provided functions to help answer questions.",
+            toolset=toolset
+        )
+        st.toast(f"Created agent, ID: {agent.id}")
+
+        # Creating a thread for interaction  
+        thread = project_client.agents.create_thread()  
+        st.toast(f"Created thread, ID: {thread.id}")
+
+        # Creating message to invoke get_country_name  
+        message = project_client.agents.create_message(  
+            thread_id=thread.id,  
+            role="user",  
+            content=user_input  
+        )
+        st.toast(f"Created message, ID: {message.id}")
+
+        # Creating and process the run using the agent  
+        run = project_client.agents.create_and_process_run(  
+            thread_id=thread.id,  
+            agent_id=agent.id  
+        )
+        st.toast(f"Run finished with status: {run.status}")
+        project_client.agents.delete_agent(agent.id)
+
+        # Listing all messages in the thread, including the response from get_country_name  
         messages = project_client.agents.list_messages(thread_id=thread.id)
-        for text_message in messages.text_messages:
-            st.write(text_message.as_dict())
+        st.json([msg.as_dict() for msg in messages.text_messages])
