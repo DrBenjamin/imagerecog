@@ -1,0 +1,74 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MCP code review Tool",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": 'http://212.227.102.172:8080'
+    }
+  ],
+  "paths": {
+    "/review_code": {
+      "post": {
+        "summary": "Review Code",
+        "operationId": "reviewCode",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": { 
+                    "type": "string",
+                    "description": "Code to be reviewed. Can be a single line or multiple lines."
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Programming language of the code."
+                  }
+                },
+                "required": ["code", "language"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Code review result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "review": { 
+                        "type": "string",
+                        "description": "Code review result"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error processing the request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

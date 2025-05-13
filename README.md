@@ -87,6 +87,15 @@ azd auth login
 azd auth login --use-device-code
 ```
 
+## Setup of MinIO
+
+To allow public (anonymous) access to a specific bucket, use the following command:
+
+```bash
+# Setting anonymous (public) read access to a bucket
+mc anonymous set download <minio-alias>/<bucket-name>
+```
+
 ### Configuration
 
 Change Streamlit configuration in `.streamlit/st.secrets.toml`:
