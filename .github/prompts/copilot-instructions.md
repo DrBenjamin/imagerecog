@@ -1,18 +1,15 @@
-<<<<<<< HEAD
-# Copilot Instructions for imagerecog
-=======
 # Copilot Instructions for BenBox
->>>>>>> 9ac9eadc715f6aac784dc21d33e4e7490973c290
 
 Dearest Copilot,
 this project is an Agent AI app utilizing
 MCP (Model Context Protocol) tools. The agent system uses the
 [Agent Development Kit](https://google.github.io/adk-docs/) which is a
 Python first approach. The backend is a Streamlit app that serves as a client to
-the MCP server tools.
+the MCP server tools. It has an inbuild RAG (retrieval-augmented generation)
+system to store and retrieve documents as vectors for similarity search.
 
 An Angular mobile app is also included which utilizes the Streamlit client 
-application(as iframe embedded).
+application (as iframe embedded).
 
 When generating code snippets or explanations, please follow these guidelines:
 

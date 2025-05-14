@@ -667,6 +667,8 @@ elif func_choice == "❄️ Navigator":
                     ("system", "{system}\n<context>\n{context}\n</context>"),
                     ("human", st.secrets["LLM"]["LLM_USER_EXAMPLE"]),
                     ("ai", st.secrets["LLM"]["LLM_ASSISTANT_EXAMPLE"]),
+                    ("human", st.secrets["LLM"]["LLM_USER_EXAMPLE2"]),
+                    ("ai", st.secrets["LLM"]["LLM_ASSISTANT_EXAMPLE2"]),
                     MessagesPlaceholder(variable_name="history"),
                     ("human", "{question}"),
                 ]
