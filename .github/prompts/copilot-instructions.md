@@ -11,12 +11,16 @@ system to store and retrieve documents as vectors for similarity search.
 An Angular mobile app is also included which utilizes the Streamlit client 
 application (as iframe embedded).
 
+Also there is a desktop app which manages the files and works with Cloud blod storage.
+It can be run locally or in the cloud.
+
 When generating code snippets or explanations, please follow these guidelines:
 
 1. Output always in Markdown.
 
 2. When referring to a file in this repo, link using `#file:<relative_path>`.
    - Angular mobile app: [src/app/app.components.ts](#file:src/app/app.components.ts)
+   - Phoenix desktop app: [Dateiablage.py](#file:Dateiablage.py)
    - Streamlit client app: [app.py](#file:app.py)
    - MCPClient class: [src/client.py](#file:src/client.py)
    - MCP server [src/server.py](#file:src/server.py)
@@ -58,11 +62,22 @@ When generating code snippets or explanations, please follow these guidelines:
     - Add or update tests under `tests/`
     - Use `pytest` fixtures to mock `st.session_state`
 
-10. Business case:
+10. Prose:
+   Healthcare is a complex and sensitive field of service which is not storable
+   as other services. So realtime data is much needed at the moment of encounter
+   with the patient. Therefore software that is used to process such
+   data in real-time needs to be learned and understood by the service
+   providers. The need of user-friendly interfaces to access handbooks, faq and
+   much more educational material for these systems is a must. With the rise of
+   Generative AI, nurses, clinicians, and other healthcare service providers can
+   be supplied with curated information about the software they are using, how they
+   simulate the actual clinical processes and how they can be effectively used.
+
+11. Business case:
    - The app is designed to be a user-friendly interface for healthcare service
-       providers in Germany to learn about HIS (Hospital Information System) or
-       other healthcare software. It provides a platform for users to ask,
-      learn, and understand the software, with a focus on the German healthcare system.
-   - Different media formats are supported, including text, images, and videos.
-   - It is not a medical advice tool and should not be used for medical diagnosis or
-       treatment.
+     providers in Germany to learn about HIS (Hospital Information System) or
+     other healthcare software. It provides a platform for users to ask,
+     learn, and understand the software, with a focus on the German healthcare system.
+   - Different source media formats are supported, including text, images, and videos.
+   - It is NOT a medical advice tool and should not be used for medical diagnosis or
+     treatment.

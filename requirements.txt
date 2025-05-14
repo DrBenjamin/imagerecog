@@ -23,6 +23,14 @@ snowflake-connector-python
 snowflake-snowpark-python
 snowflake[ml]
 minio
+pyinstaller
+pandas
+xlsxwriter
+openpyxl
+xlrd
+python-docx
+bs4
+jinja2
 langchain
 langchain_community
 langchain_core

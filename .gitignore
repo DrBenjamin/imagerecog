@@ -27,3 +27,11 @@ src/assets/AppIcon-512@2x.png
 src/assets/BenBox_Logo.png
 package.json
 .angular/*
+.vscode/settings.json
+.conda/*
+Export_Dateiliste.docx
+Dateiablage.exe
+Dateiablage.app
+_internal/*
+Dateiablage
+docker.txt
