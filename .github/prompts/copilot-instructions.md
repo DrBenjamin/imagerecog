@@ -17,11 +17,13 @@ application(as iframe embedded).
 When generating code snippets or explanations, please follow these guidelines:
 
 1. Output always in Markdown.
+
 2. When referring to a file in this repo, link using `#file:<relative_path>`.
    - Angular mobile app: [src/app/app.components.ts](#file:src/app/app.components.ts)
    - Streamlit client app: [app.py](#file:app.py)
    - MCPClient class: [src/client.py](#file:src/client.py)
    - MCP server [src/server.py](#file:src/server.py)
+   - MCP server tools: [src/server/*](#file:src/server/*)
 
 3. Code‑block format for changes or new files:
     ````python
@@ -35,7 +37,8 @@ When generating code snippets or explanations, please follow these guidelines:
 4. Comments format:
    - Use `#` for comments
    - Start comments with 'Setting', 'Creating', 'Adding', 'Updating' etc.
-     (always the gerund form)
+     (always the gerund form) and before it add an empty line if not the
+     beginning of a code block or function.
 
 5. Adhere to PEP 8:
    - 4‑space indentation, snake_case names
