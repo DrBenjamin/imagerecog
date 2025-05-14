@@ -720,7 +720,9 @@ elif func_choice == "❄️ Navigator":
                     answer = str(resp)
                 answer = answer.replace("Assistant: ", "").replace("\n", " ").lstrip()
                 processing_time = int(time.time() - st.session_state.start)
-                st.chat_message("ai").markdown(f"{answer} (verarbeitet in {processing_time} Sekunden)")
+                st.chat_message("ai").markdown(
+                    f"```\n{answer}\n```\n\n_(verarbeitet in {processing_time} Sekunden)_"
+                )
 
             # Showing similarity search results if available
             if (
