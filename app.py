@@ -79,6 +79,8 @@ except:
 
 
 # Setting session states
+if "answer" not in st.session_state:
+    st.session_state.answer = None
 if "response" not in st.session_state:
     st.session_state.response = None
 if "offline_resources" not in st.session_state:
@@ -720,10 +722,10 @@ elif func_choice == "❄️ Navigator":
                                     break
                 if answer is None:
                     answer = str(resp)
-                answer = answer.replace("Assistant: ", "").replace("\n", " ").lstrip()
+                st.session_state.answer = answer.replace("Assistant: ", "").replace("\n", " ").lstrip()
                 processing_time = int(time.time() - st.session_state.start)
                 st.chat_message("ai").markdown(
-                    f"```\n{answer}\n```\n\n_(verarbeitet in {processing_time} Sekunden)_"
+                    f"```\n{st.session_state.answer}\n```\n\n_(verarbeitet in {processing_time} Sekunden)_"
                 )
 
             # Showing similarity search results if available
@@ -824,7 +826,7 @@ elif func_choice == "🤖 OpenAI Agents":
             model="gpt-4o-mini",
             name="Agent Two",
             instructions="You are Agent Two. Use only the MCP tools provided via OpenAPI.",
-            toolset=toolset,
+            #toolset=toolset,
         )
         st.toast(f"Created agent 2, ID: {agent2.id}")
 

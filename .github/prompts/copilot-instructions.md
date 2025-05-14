@@ -57,3 +57,12 @@ When generating code snippets or explanations, please follow these guidelines:
 9. Testing:
     - Add or update tests under `tests/`
     - Use `pytest` fixtures to mock `st.session_state`
+
+10. Business case:
+   - The app is designed to be a user-friendly interface for healthcare service
+       providers in Germany to learn about HIS (Hospital Information System) or
+       other healthcare software. It provides a platform for users to ask,
+      learn, and understand the software, with a focus on the German healthcare system.
+   - Different media formats are supported, including text, images, and videos.
+   - It is not a medical advice tool and should not be used for medical diagnosis or
+       treatment.
