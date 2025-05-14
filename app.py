@@ -471,6 +471,32 @@ elif func_choice == "❄️ Navigator":
             system += st.text_input("System Instruktion+", value=f" {st.secrets['LLM']['LLM_SYSTEM_PLUS']}", max_chars=500)
             assistant = st.text_input("Assistant Instruktion", value=st.secrets["LLM"]["LLM_ASSISTANT"], max_chars=500)
 
+        # Adding chat import feature to sidebar (only if chat history is empty)
+        msgs_tmp = st.session_state.get("langchain_messages", None)
+        msgs_empty = not msgs_tmp or not getattr(msgs_tmp, "messages", [])
+        if msgs_empty:
+            uploaded_chat = st.file_uploader("Importiere Chat-JSON", type=["json"], key="chat_json_import")
+            if uploaded_chat is not None:
+                try:
+                    # Loading and parsing the uploaded JSON
+                    chat_data = json.load(uploaded_chat)
+
+                    # Creating or resetting the message history
+                    msgs = StreamlitChatMessageHistory(key="langchain_messages")
+                    msgs.clear()
+
+                    # Adding messages from the imported JSON
+                    for msg in chat_data:
+                        msg_type = msg.get("type")
+                        content = msg.get("content", "")
+                        if msg_type == "ai":
+                            msgs.add_ai_message(content)
+                        elif msg_type == "human":
+                            msgs.add_user_message(content)
+                    st.toast("Chatverlauf importiert! Die Unterhaltung kann fortgesetzt werden.")
+                except Exception as e:
+                    st.error(f"Fehler beim Importieren des Chatverlaufs: {e}")
+
     # Showing the title
     st.title(st.secrets["LLM"]["LLM_CHATBOT_NAME"])
 
@@ -671,6 +697,8 @@ elif func_choice == "❄️ Navigator":
                     ("ai", st.secrets["LLM"]["LLM_ASSISTANT_EXAMPLE"]),
                     ("human", st.secrets["LLM"]["LLM_USER_EXAMPLE2"]),
                     ("ai", st.secrets["LLM"]["LLM_ASSISTANT_EXAMPLE2"]),
+                    ("human", st.secrets["LLM"]["LLM_USER_EXAMPLE3"]),
+                    ("ai", st.secrets["LLM"]["LLM_ASSISTANT_EXAMPLE3"]),
                     MessagesPlaceholder(variable_name="history"),
                     ("human", "{question}"),
                 ]
