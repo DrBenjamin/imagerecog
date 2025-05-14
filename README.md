@@ -181,28 +181,6 @@ llamalink
 Then change the `MCP_URL` in the `.streamlit/st.secrets.toml` file to
 `http://localhost:11434`.
 
-### Docker
-
-To use Docker for MCP server hosting, use the following commands:
-
-```bash
-# Build the docker image
-docker build -t <docker hub user name>/BenBox .
-
-# Login to Docker Hub
-docker login
-
-# Tagging the image
-docker tag <docker hub user name>/BenBox <docker hub user name>/BenBox:latest
-
-# Push the image to the registry
-docker push <docker hub user name>BenBox:latest
-```
-
-Now the MCP docker can be added in
-[VS Code](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) or any
-other MCP client like Claude Desktop.
-
 ## Usage
 
 Test bytes for an image to test on MCP Inspector (running on
@@ -215,7 +193,7 @@ Test bytes for an image to test on MCP Inspector (running on
 or use the Streamlit app running on [http://localhost:8501](http://localhost:8501)
 to upload an image and test it.
 
-### Mobile App
+## Mobile App
 
 The Angular app can be run using the following commands:
 
@@ -279,3 +257,100 @@ npm run build
 npm run cap:copy
 npm run cap:open:ios
 ```
+
+## Dateiablage desktop app
+
+Tool for organizing the files. It can be run locally or in a Docker container and
+be consumed via VNC browser session.
+
+### Setup
+
+[Setup description](https://github.com/DrBenjamin/Dateiablage/blob/main/SETUP.md)
+
+Install dependencies:
+
+```bash
+# Installing dependencies
+brew install minio/stable/mc
+# or on linux
+sudo apt install minio-client
+
+# Setting up the MinIO alias
+mc alias set myminio http://212.227.102.172:9000 minioadmin --insecure
+```
+
+### Execution
+
+```bash
+# Running the application
+python Dateiablage.py
+```
+
+### Building
+
+Add the following images to the `_internal/images` folder:
+
+- icon.ico (128x128) for Windows
+- icon.icns (128x128) for MacOS
+- logo.png (not more than 200px either dimension) for the GUI
+
+To build the executables, run the following command:
+
+```bash
+# Building on Windows
+pyinstaller.bat
+
+# or for MacOS & Linux
+python -m PyInstaller Dateiablage.spec
+```
+
+### Docker
+
+To run the application in a Docker container, use the following command:
+
+```bash
+# Building the image
+docker build --no-cache -t dateiablage-vnc .
+
+# Setting environment variables
+export MINIO_ENDPOINT="127.0.0.1:9000"
+export MINIO_ACCESS_KEY="<username>"
+export MINIO_SECRET_KEY="<password>"
+export MINIO_SECURE="False"
+export MINIO_BUCKET="bucket_name"
+
+# Running the container
+docker run -it --rm -p 6080:6080 \
+    -e MINIO_ENDPOINT=$MINIO_ENDPOINT \
+    -e MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY \
+    -e MINIO_SECRET_KEY=$MINIO_SECRET_KEY \
+    -e MINIO_SECURE=$MINIO_SECURE \
+    -e MINIO_BUCKET=$MINIO_BUCKET \
+    dateiablage-vnc
+```
+
+### OS specific notes
+
+All executables are built with PyInstaller and need to be build on the target
+system.
+
+#### Windows
+
+To remove virtual drives manually, run the `subst` command:
+
+```bash
+# Adding folger example 
+subst D: "C:\Users\dateiablage\Documents\GitHub\Dateiablage"
+
+# Removing drive letter D:
+subst /d D:
+```
+
+#### MacOS
+
+To run the executable, you need to allow it after the first start in the Privacy
+settings.
+
+#### Linux
+
+Add the icon manually to the executable.
