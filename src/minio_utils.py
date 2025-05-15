@@ -16,7 +16,7 @@ def connect_to_minio():
     try:
         # Removing protocol and any path from endpoint (only host:port allowed)
         endpoint = re.sub(r"^https?://", "", g.minio_endpoint, flags=re.IGNORECASE)
-        endpoint = endpoint.split("/")[0]  # Only keep host:port, remove any path
+        endpoint = endpoint.split("/")[0]  # keeping only host:port, remove any path
         client = Minio(
             endpoint,
             access_key=g.minio_access_key,
@@ -78,3 +78,21 @@ def list_objects(minio_client, bucket_name):
         wx.MessageBox(
             f"Fehler beim auflisten der MinIO-Dateien: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
     return
+
+# Adding a helper to delete an object from a bucket
+def delete_object_from_bucket(minio_client, bucket_name, object_name):
+    """
+    Deleting an object from the specified MinIO bucket.
+
+    Args:
+        minio_client: Minio client instance.
+        bucket_name: Name of the bucket (str).
+        object_name: Name of the object to delete (str).
+    """
+    # Normalizing bucket name before use
+    bucket_name_norm = bucket_name.lower().replace(' ', '-')
+
+    # Avoiding double prefix in object_name (e.g. test/test/file.pdf)
+    if object_name.startswith(f"{bucket_name_norm}/"):
+        object_name = object_name[len(bucket_name_norm) + 1:]
+    minio_client.remove_object(bucket_name_norm, object_name)

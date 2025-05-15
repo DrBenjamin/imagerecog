@@ -4,14 +4,13 @@
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 # Modules
 import wx
-import os
 import src.globals as g
 from minio.error import S3Error
-from io import BytesIO
 from src.minio_utils import (
     connect_to_minio,
     list_buckets,
-    upload_files
+    upload_files,
+    delete_object_from_bucket
 )
 
 # Method to create a new bucket

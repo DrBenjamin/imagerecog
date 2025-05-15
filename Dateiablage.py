@@ -104,9 +104,7 @@ class MyFrame(wx.Frame):
 
         # Creating the `Datei` menu
         file_menu = wx.Menu()
-        create_bucket_item = file_menu.Append(
-            wx.ID_ANY, "Neuen Bucket erstellen")
-        remove_bucket_item = file_menu.Append(wx.ID_ANY, "Bucket löschen")
+        create_bucket_item = file_menu.Append(wx.ID_ANY, "Neuen Bucket erstellen")
         file_menu.AppendSeparator()
         upload_file_minio = file_menu.Append(wx.ID_ANY, "Datei(en) hochladen")
         exit_app = file_menu.Append(wx.ID_EXIT, "&Beenden")
@@ -114,6 +112,7 @@ class MyFrame(wx.Frame):
 
         # Creating the `Bearbeiten` menu
         edit_menu = wx.Menu()
+        remove_bucket_item = edit_menu.Append(wx.ID_ANY, "Bucket löschen")
         edit_menu.AppendSeparator()
         copy_path = edit_menu.Append(wx.ID_ANY, "Kopiere Pfad")
         delete_file_item = edit_menu.Append(wx.ID_ANY, "Datei löschen")

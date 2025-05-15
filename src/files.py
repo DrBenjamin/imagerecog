@@ -11,10 +11,11 @@ import subprocess
 import platform
 import src.globals as g
 from minio.error import S3Error
-from io import BytesIO
 from src.minio_utils import (
     connect_to_minio,
-    list_objects
+    list_objects,
+    upload_files,
+    delete_object_from_bucket
 )
 
 # Method to upload file
@@ -38,8 +39,6 @@ def on_upload_file(self, event):
             wx.MessageBox("Kein Bucket ausgewählt.", "Fehler", wx.OK | wx.ICON_ERROR)
             return
         try:
-            # Using the helper from minio_utils
-            from src.minio_utils import upload_files
             upload_files(minio_client, bucket_name, file_paths)
             wx.MessageBox(f"{len(file_paths)} Datei(en) erfolgreich in den Bucket '{bucket_name}' hochgeladen.", "Upload abgeschlossen", wx.OK | wx.ICON_INFORMATION)
 
@@ -76,11 +75,12 @@ def on_delete_file(self, event):
             if minio_client is None:
                 wx.MessageBox("MinIO-Verbindung konnte nicht hergestellt werden.", "Fehler", wx.OK | wx.ICON_ERROR)
                 return
-            minio_client.remove_object(bucket_name.lower().replace(' ', '-'), object_name)
+
+            # Using the helper to delete the object from the bucket
+            delete_object_from_bucket(minio_client, bucket_name, object_name)
             wx.MessageBox(f"Datei '{object_name}' wurde gelöscht.", "Erfolg", wx.OK | wx.ICON_INFORMATION)
 
             # Refreshing file list
-            from src.files import refresh_files_ctrl_with_minio
             refresh_files_ctrl_with_minio(self)
         except Exception as e:
             wx.MessageBox(f"Fehler beim Löschen der Datei: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
@@ -149,14 +149,6 @@ def on_file_activated(self, event):
     except Exception as e:
         wx.MessageBox(f"Datei konnte nicht geöffnet oder heruntergeladen werden: {e}", "Error", wx.OK | wx.ICON_ERROR)
 
-# Method to list the files in the selected folder
-def list_files(self, list_files):
-    # Clearing the existing file list
-    g.file_list = list_files
-
-    # Displaying in the File Explorer
-    self.file_listbox.Set(g.file_list)
-
 # Method to refresh and display MinIO bucket files in the learning_ctrl
 def refresh_files_ctrl_with_minio(self):
     try:
@@ -190,8 +182,20 @@ def refresh_files_ctrl_with_minio(self):
         files = list_objects(minio_client, g.minio_bucket_name)
         if files is None:
             files = []
-        list_files(self, files)
 
+        # Ensuring all files are prefixed with the bucket name
+        bucket_name = g.minio_bucket_name
+        if isinstance(bucket_name, list):
+            prefixed_files = []
+            for b in bucket_name:
+                prefixed_files.extend([f"{b}/{f}" if not f.startswith(f"{b}/") else f for f in files])
+            files = prefixed_files
+        else:
+            files = [f"{bucket_name}/{f}" if not f.startswith(f"{bucket_name}/") else f for f in files]
+
+        # Setting and displaying files in the File Explorer
+        g.file_list = files
+        self.file_listbox.Set(g.file_list)
     except Exception as e:
         wx.MessageBox(
             f"Fehler beim Laden der MinIO-Dateien: {e}", "Fehler", wx.OK | wx.ICON_ERROR)

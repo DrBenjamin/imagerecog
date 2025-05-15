@@ -28,14 +28,21 @@ def on_right_click(self, event):
 # Method to handle the Copy Path menu item
 def on_copy_path(self, event):
     if g.file_path is not None:
+        # Setting protocol based on g.minio_secure
         minio_endpoint = g.minio_endpoint
+        protocol = "https" if getattr(g, "minio_secure", False) else "http"
         if not minio_endpoint.startswith("http"):
-            minio_endpoint = "http://" + minio_endpoint
+            minio_endpoint = f"{protocol}://{minio_endpoint}"
 
         # Removing trailing slash if present
         minio_endpoint = minio_endpoint.rstrip("/")
-        bucket = g.minio_bucket_name
+        bucket = g.minio_bucket_name.lower().replace(" ", "-")
+
+        # Updating to remove bucket prefix from file_path if present
         object_name = g.file_path.lstrip("/")
+        if object_name.startswith(f"{bucket}/"):
+            object_name = object_name[len(bucket) + 1:]
+
         url = f"{minio_endpoint}/{bucket}/{object_name}"
         wx.TheClipboard.Open()
         wx.TheClipboard.SetData(wx.TextDataObject(url))
