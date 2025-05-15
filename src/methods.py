@@ -19,7 +19,6 @@ def on_right_click(self, event):
     # Binding handlers
     self.Bind(wx.EVT_MENU, self.on_file_activated, open_item)
     self.Bind(wx.EVT_MENU, self.on_copy_path, copy_path)
-    self.Bind(wx.EVT_MENU, self.on_convert, convert_item)
 
     # Showing the menu
     self.PopupMenu(menu, event.GetPosition())
