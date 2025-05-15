@@ -90,4 +90,8 @@ ENV PATH="$PATH:/home/ben/minio-binaries"
 
 RUN mc --help || true
 
-ENTRYPOINT ["/home/ben/Dateiablage/entrypoint.sh"]
+# Installing Streamlit
+RUN python -m pip install --no-cache-dir streamlit
+
+# Set entrypoint to run Streamlit app
+ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]

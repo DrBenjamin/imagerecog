@@ -314,6 +314,12 @@ docker build --no-cache -t dateiablage-vnc .
 
 # Running the container
 docker run -it --rm -p 6080:6080 dateiablage-vnc
+
+# Building the image using docker-compose
+docker-compose build
+
+# Running the container in the background
+docker-compose up -d
 ```
 
 ### OS specific notes

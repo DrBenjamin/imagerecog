@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  benbox:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: benbox:latest
+    container_name: benbox
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8501:8501"
+      - "9000:9000"
+    environment:
+      - DISPLAY_NUM=1
+      - HEIGHT=768
+      - WIDTH=1024
+    volumes:
+      - ./data:/home/ben/data
