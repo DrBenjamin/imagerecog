@@ -1,11 +1,12 @@
-FROM ubuntu:22.04
+FROM mambaorg/micromamba:1.5.8-jammy
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV DEBIAN_PRIORITY=high
+ENV USERNAME=ben
+ENV HOME=/home/$USERNAME
+USER root
 
-# Installing only minimal system dependencies for Streamlit
+# Installing minimal system dependencies for Streamlit (no X11, no GUI)
 RUN apt-get update && \
-    apt-get -y upgrade && \
     apt-get -y install \
     build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
     libsqlite3-dev curl git libncursesw5-dev xz-utils tk-dev libxml2-dev \
@@ -14,65 +15,26 @@ RUN apt-get update && \
     xdg-utils w3m && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENV USERNAME=ben
-ENV HOME=/home/$USERNAME
-
 # Creating user early for better cache
 RUN useradd -m -s /bin/bash -d $HOME $USERNAME && \
     echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
-USER root
+USER $USERNAME
+WORKDIR $HOME/BenBox
 
-# Installing Miniforge (conda-forge based) as root, with architecture detection
-ENV CONDA_DIR=/opt/conda
-RUN ARCH=$(uname -m) && \
-    if [ "$ARCH" = "x86_64" ]; then \
-        MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh"; \
-    elif [ "$ARCH" = "aarch64" ]; then \
-        MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh"; \
-    else \
-        echo "Unsupported architecture: $ARCH" && exit 1; \
-    fi && \
-    curl -sSL $MINIFORGE_URL -o miniforge.sh && \
-    bash miniforge.sh -b -p $CONDA_DIR && \
-    rm miniforge.sh && \
-    $CONDA_DIR/bin/conda clean -afy
-ENV PATH="$CONDA_DIR/bin:$PATH"
-
-# Copying only environment.yml first for better cache
-COPY --chown=ben:ben environment_streamlit.yml /home/ben/Dateiablage/environment_streamlit.yml
-
-# Updating permissions for conda envs and pkgs directories
-RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs && \
-    mkdir -p /opt/conda/pkgs && chmod -R 777 /opt/conda/pkgs
-
-USER ben
-RUN mkdir -p /home/ben/.conda
+# Copying only environment_streamlit.yml first for better cache
+COPY --chown=ben:ben environment_streamlit.yml $HOME/BenBox/environment_streamlit.yml
 
 # Creating conda env before copying source for cache
-WORKDIR /home/ben/Dateiablage
-RUN conda env create -v -f environment_streamlit.yml && conda clean -afy
+RUN micromamba create -y -n benbox -f environment_streamlit.yml && \
+    micromamba clean -a -y
 
-# Setting conda environment variables
+ENV MAMBA_DOCKERFILE_ACTIVATE=1
 ENV CONDA_DEFAULT_ENV=benbox
-ENV PATH="/opt/conda/envs/benbox/bin:$PATH"
-
-# Installing MinIO mc CLI to $HOME/minio-binaries and add to PATH
-RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
-    --create-dirs \
-    -o /home/ben/minio-binaries/mc && \
-    chmod +x /home/ben/minio-binaries/mc
-
-ENV PATH="$PATH:/home/ben/minio-binaries"
+ENV PATH="/home/ben/micromamba/envs/benbox/bin:$PATH"
 
 # Copying the rest of the repo (after env is built)
-COPY --chown=ben:ben . /home/ben/Dateiablage
-
-# Adding entrypoint.sh (if needed for Streamlit)
-USER root
-COPY entrypoint.sh /home/ben/Dateiablage/entrypoint.sh
-RUN chmod +x /home/ben/Dateiablage/entrypoint.sh
-USER ben
+COPY --chown=ben:ben . $HOME/BenBox
 
 # Default command for Streamlit container
-CMD ["python", "-m", "streamlit", "run", "app.py"]
+CMD ["micromamba", "run", "-n", "benbox", "python", "-m", "streamlit", "run", "app.py"]

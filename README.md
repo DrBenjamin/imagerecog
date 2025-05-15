@@ -308,17 +308,18 @@ python -m PyInstaller Dateiablage.spec
 To run the application in a Docker container, use the following command:
 
 ```bash
-# Building the image
+# Building the images
 docker build --no-cache -t dateiablage-vnc .
 docker build --no-cache -f Dockerfile_Streamlit -t streamlit .
 
 # Running the container
 docker run -it --rm -p 6080:6080 dateiablage-vnc
+docker run -it --rm -p 8501:8501 streamlit
 
-# Building the image using docker-compose
+# or building the images using docker-compose
 docker-compose build --no-cache
 
-# Running the container in the background
+# and running them in the background
 docker-compose up -d
 ```
 
