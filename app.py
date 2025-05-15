@@ -443,8 +443,12 @@ elif func_choice == "❄️ Navigator":
                 except Exception as e:
                     st.error(f"Fehler beim Löschen der Tabelle: {e}")
         if selected_disp == "Erstelle neue Tabelle":
+            try:
+                default_table_name = st.query_params.get_all("bucket")[0].upper()
+            except:
+                default_table_name = "TEST"
             new_disp = st.text_input(
-                "Tabellenname", value=st.query_params.get_all("bucket")[0].upper(), on_change=_reset_vector_store)
+                "Tabellenname", value=default_table_name, on_change=_reset_vector_store)
             st.session_state.option_embedding_model = st.selectbox(
                 "Wähle das Embedding-Modell", options=st.secrets["snowflake"]["embedding_models"],
                 index=0, key="embedding_model"
