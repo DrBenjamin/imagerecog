@@ -42,7 +42,10 @@ RUN ARCH=$(uname -m) && \
     $CONDA_DIR/bin/conda clean -afy
 ENV PATH="$CONDA_DIR/bin:$PATH"
 
-# Copying only environment.yml first for better cache
+# Copying requirements.txt before creating the environment for pip install
+COPY --chown=ben:ben requirements.txt /home/ben/Dateiablage/requirements.txt
+
+# Copying only environment.yml after requirements.txt for correct pip -r path
 COPY --chown=ben:ben environment.yml /home/ben/Dateiablage/environment.yml
 
 # Updating permissions for conda envs and pkgs directories
