@@ -74,9 +74,10 @@ USER ben
 COPY --chown=ben:ben environment.yml /home/ben/Dateiablage/environment.yml
 WORKDIR /home/ben/Dateiablage
 
-# Updating permissions for conda envs directory to fix NoWritableEnvsDirError
+# Updating permissions for conda envs and pkgs directories to fix NoWritableEnvsDirError and NoWritablePkgsDirError
 USER root
-RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs
+RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs && \
+    mkdir -p /opt/conda/pkgs && chmod -R 777 /opt/conda/pkgs
 
 USER ben
 RUN conda env create -f environment.yml && conda clean -afy
