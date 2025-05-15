@@ -43,5 +43,5 @@ RUN chmod +x $HOME/BenBox/run.sh
 RUN chown -R ben:ben $HOME/BenBox
 USER ben
 
-# Updating entrypoint to use absolute path (environment variables are not expanded in ENTRYPOINT)
-ENTRYPOINT ["/home/ben/BenBox/run.sh"]
+# Starting the Streamlit app
+ENTRYPOINT ["python", "-m", "streamlit", "run", "app.py"]
