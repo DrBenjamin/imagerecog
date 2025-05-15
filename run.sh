@@ -10,4 +10,4 @@ mcp dev src/server.py > /dev/null 2>&1 &
 python src/server.py > /dev/null 2>&1 &
 
 # Starting the Streamlit app
-python -m streamlit run app.py --server.enableXsrfProtection false > /dev/null 2>&1 &
+python -m streamlit run app.py --server.enableXsrfProtection false
