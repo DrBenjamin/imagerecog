@@ -43,10 +43,10 @@ RUN ARCH=$(uname -m) && \
 ENV PATH="$CONDA_DIR/bin:$PATH"
 
 # Copying requirements.txt before creating the environment for pip install
-COPY --chown=ben:ben requirements.txt /home/ben/Dateiablage/requirements.txt
+COPY --chown=ben:ben requirements.txt /home/ben/BenBox/requirements.txt
 
 # Copying only environment.yml after requirements.txt for correct pip -r path
-COPY --chown=ben:ben environment.yml /home/ben/Dateiablage/environment.yml
+COPY --chown=ben:ben environment.yml /home/ben/BenBox/environment.yml
 
 # Updating permissions for conda envs and pkgs directories
 RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs && \
@@ -56,12 +56,12 @@ USER ben
 RUN mkdir -p /home/ben/.conda
 
 # Creating conda env before copying source for cache
-WORKDIR /home/ben/Dateiablage
+WORKDIR /home/ben/BenBox
 RUN conda env create -v -f environment.yml && conda clean -afy
 
 # Setting conda environment variables
-ENV CONDA_DEFAULT_ENV=dateiablage
-ENV PATH="/opt/conda/envs/dateiablage/bin:$PATH"
+ENV CONDA_DEFAULT_ENV=BenBox
+ENV PATH="/opt/conda/envs/BenBox/bin:$PATH"
 
 # Installing wxPython and PyInstaller only for desktop app
 RUN python -m pip install --upgrade pip && \
@@ -69,10 +69,10 @@ RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir pyinstaller
 
 # Copying the rest of the repo (after env is built)
-COPY --chown=ben:ben . /home/ben/Dateiablage
+COPY --chown=ben:ben . /home/ben/BenBox
 
-# Building the Dateiablage app using PyInstaller (inside conda env)
-RUN conda run -n dateiablage python -m PyInstaller --noconfirm --clean Dateiablage.py
+# Building the BenBox app using PyInstaller (inside conda env)
+RUN conda run -n BenBox python -m PyInstaller --noconfirm --clean BenBox.py
 
 ARG DISPLAY_NUM=1
 ARG HEIGHT=768
@@ -102,8 +102,8 @@ ENV PATH="$PATH:/home/ben/minio-binaries"
 
 # Adding entrypoint.sh
 USER root
-COPY entrypoint.sh /home/ben/Dateiablage/entrypoint.sh
-RUN chmod +x /home/ben/Dateiablage/entrypoint.sh
+COPY entrypoint.sh /home/ben/BenBox/entrypoint.sh
+RUN chmod +x /home/ben/BenBox/entrypoint.sh
 USER ben
 
-ENTRYPOINT ["/home/ben/Dateiablage/entrypoint.sh"]
+ENTRYPOINT ["/home/ben/BenBox/entrypoint.sh"]

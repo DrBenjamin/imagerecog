@@ -11,26 +11,26 @@ for /d %%D in (_internal\*) do (
         rd /s /q "%%D"
     )
 )
-if exist Dateiablage.exe (
-    del /q Dateiablage.exe
+if exist BenBox.exe (
+    del /q BenBox.exe
 )
 
-REM 2) Run PyInstaller with Dateiablage.spec
-python -m PyInstaller --noconfirm Dateiablage.spec
+REM 2) Run PyInstaller with BenBox.spec
+python -m PyInstaller --noconfirm BenBox.spec
 
-REM 3) Copy Dateiablage.exe to the current directory
-xcopy /y /i /e "dist\Dateiablage\Dateiablage.exe" "%~dp0"
+REM 3) Copy BenBox.exe to the current directory
+xcopy /y /i /e "dist\BenBox\BenBox.exe" "%~dp0"
 
 REM 4) Copy (or merge) the images folder to _internal\images
-xcopy /y /i /e "dist\Dateiablage\_internal\_internal\images" "%~dp0\_internal\images"
+xcopy /y /i /e "dist\BenBox\_internal\_internal\images" "%~dp0\_internal\images"
 
 REM 5)  Remove the _internal\_internal directory
-if exist dist\Dateiablage\_internal\_internal (
-    rd /s /q dist\Dateiablage\_internal\_internal
+if exist dist\BenBox\_internal\_internal (
+    rd /s /q dist\BenBox\_internal\_internal
 )
 
 REM 6) Copy/merge the rest of the _internal directory to _internal
-xcopy /y /i /e "dist\Dateiablage\_internal" "%~dp0\_internal"
+xcopy /y /i /e "dist\BenBox\_internal" "%~dp0\_internal"
 
 REM 7) Remove the dist directory
 if exist dist (

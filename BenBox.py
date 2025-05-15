@@ -1,4 +1,4 @@
-### `Dateiablage.py`
+### `BenBox.py`
 ### Main Phoenix application
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
@@ -294,7 +294,7 @@ class MyFrame(wx.Frame):
 class MyApp(wx.App):
     def OnInit(self):
         # Initializing config
-        self.config = wx.Config("Dateiablage")
+        self.config = wx.Config("BenBox")
 
         # Setting default values if they do not exist
         if not self.config.HasEntry("user_choice"):
@@ -318,7 +318,7 @@ class MyApp(wx.App):
             self.config.Write("drive_mapping_letter", "")
 
         # Creating the frame
-        frame = MyFrame(None, title="Dateiablage",
+        frame = MyFrame(None, title="BenBox",
                         size=(1024, 768),
                         config=self.config)
 

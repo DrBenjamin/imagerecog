@@ -1,5 +1,5 @@
 ### `src/files.py`
-### Files Panel for the Dateiablage application
+### Files Panel for the BenBox application
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 ## Modules

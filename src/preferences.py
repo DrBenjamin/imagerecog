@@ -1,5 +1,5 @@
 ### `src/preferences.py`
-### Preferences Panel for the Dateiablage application
+### Preferences Panel for the BenBox application
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 ## Modules

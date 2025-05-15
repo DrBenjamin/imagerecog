@@ -13,7 +13,7 @@ datas = [
 block_cipher = None
 
 a = Analysis(
-    ['Dateiablage.py'],
+    ['BenBox.py'],
     pathex=['.'],
     binaries=[],
     datas=datas,
@@ -34,7 +34,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='Dateiablage',
+    name='BenBox',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -53,17 +53,17 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='Dateiablage'
+    name='BenBox'
 )
 
 app = BUNDLE(
     coll,
-    name='Dateiablage.app',
+    name='BenBox.app',
     icon=os.path.join('_internal/images', 'icon.icns'),
     info_plist={
-        'CFBundleName': 'Dateiablage',
+        'CFBundleName': 'BenBox',
         'CFBundleShortVersionString': '0.1.0',
         'CFBundleVersion': '0.1.0',
-        'CFBundleIdentifier': 'org.seriousbenentertainment.dateiablage'
+        'CFBundleIdentifier': 'org.seriousbenentertainment.BenBox'
     }
 )

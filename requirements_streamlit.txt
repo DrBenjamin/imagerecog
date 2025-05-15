@@ -1,17 +1,6 @@
 streamlit
 watchdog
-anthropic
-pillow
-starlette
-uvicorn
-httpx
-fastapi
-requests
-pillow
-fastmcp
-dotenv
 jsonref
-ollama
 openai
 openai-agents
 azure-ai-projects

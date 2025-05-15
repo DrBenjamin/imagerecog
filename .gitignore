@@ -30,7 +30,7 @@ package.json
 .vscode/settings.json
 .conda/*
 Export_Dateiliste.docx
-Dateiablage.exe
-Dateiablage.app
+BenBox.exe
+BenBox.app
 _internal/*
-Dateiablage
+BenBox

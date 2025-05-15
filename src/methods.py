@@ -1,5 +1,5 @@
 ### `src/methods.py`
-### Various methods for the Dateiablage application
+### Various methods for the BenBox application
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 ## Modules
@@ -59,22 +59,22 @@ def on_about(self, event):
     # Adding message
     message = (
         "Name der Anwendung:\n"
-        "Dateiablage\n\n"
+        "BenBox\n\n"
     )
     message_label = wx.StaticText(panel, label = message)
     sizer.Add(message_label, 0, wx.ALL, 10)
 
     # Adding logo
-    #logo = wx.Bitmap("_internal/images/logo.png", wx.BITMAP_TYPE_PNG)
-    #logo_image = wx.StaticBitmap(panel, bitmap=logo)
-    #sizer.Add(logo_image, 0, wx.ALL, 10)
+    logo = wx.Bitmap("_internal/images/logo.png", wx.BITMAP_TYPE_PNG)
+    logo_image = wx.StaticBitmap(panel, bitmap=logo)
+    sizer.Add(logo_image, 0, wx.ALL, 10)
 
     # Adding 2nd message
     message2 = (
         "Versionsnummer:\n"
-        "0.2.0 (build 2025-05-14)\n\n"
+        "0.2.0 (build 2025-05-15)\n\n"
         "**** Beschreibung ****\n"
-        "Die Dateiablage ist eine Anwendung zur unkomplizierten Verwaltung von "
+        "Die BenBox ist eine Anwendung zur unkomplizierten Verwaltung von "
         "e-Learning-Inhalten.\n\n"
         "**** Support ****\n"
         "Bei Fragen oder technischen Problemen kontaktieren Sie bitte unseren Support.\n\n"

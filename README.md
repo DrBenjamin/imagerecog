@@ -257,14 +257,14 @@ npm run cap:copy
 npm run cap:open:ios
 ```
 
-## Dateiablage desktop app
+## BenBox desktop app
 
 Tool for organizing the files. It can be run locally or in a Docker container and
 be consumed via VNC browser session.
 
 ### Setup
 
-[Setup description](https://github.com/DrBenjamin/Dateiablage/blob/main/SETUP.md)
+[Setup description](https://github.com/DrBenjamin/BenBox/blob/main/SETUP.md)
 
 Install dependencies:
 
@@ -282,7 +282,7 @@ mc alias set myminio http://212.227.102.172:9000 minioadmin --insecure
 
 ```bash
 # Running the application
-python Dateiablage.py
+python BenBox.py
 ```
 
 ### Building
@@ -300,7 +300,7 @@ To build the executables, run the following command:
 pyinstaller.bat
 
 # or for MacOS & Linux
-python -m PyInstaller Dateiablage.spec
+python -m PyInstaller BenBox.spec
 ```
 
 ### Docker
@@ -309,11 +309,11 @@ To run the application in a Docker container, use the following command:
 
 ```bash
 # Building the images
-docker build --no-cache -t dateiablage-vnc .
+docker build --no-cache -t benbox-vnc .
 docker build --no-cache -f Dockerfile_Streamlit -t streamlit .
 
 # Running the container
-docker run -it --rm -p 6080:6080 dateiablage-vnc
+docker run -it --rm -p 6080:6080 benbox-vnc
 docker run -it --rm -p 8501:8501 streamlit
 
 # or building the images using docker-compose

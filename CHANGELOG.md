@@ -5,6 +5,10 @@ All notable changes to the Agentic AI app.
 ## [0.2.0]
 - Added mobile App
     - Angular mobile app
+- Added Phoenix desktop app
+    - manages files
+    - works with Cloud blob storage
+    - can be run locally or in the cloud
 - Added MCP server
     - get_country_name
         - get the country name from the country code

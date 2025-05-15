@@ -1,5 +1,5 @@
 # `src/learning.py`
-# Learning Panel for the Dateiablage application
+# Learning Panel for the BenBox application
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 # Modules

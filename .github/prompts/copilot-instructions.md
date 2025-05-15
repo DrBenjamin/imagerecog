@@ -20,7 +20,7 @@ When generating code snippets or explanations, please follow these guidelines:
 
 2. When referring to a file in this repo, link using `#file:<relative_path>`.
    - Angular mobile app: [src/app/app.components.ts](#file:src/app/app.components.ts)
-   - Phoenix desktop app: [Dateiablage.py](#file:Dateiablage.py)
+   - Phoenix desktop app: [BenBox.py](#file:BenBox.py)
    - Streamlit client app: [app.py](#file:app.py)
    - MCPClient class: [src/client.py](#file:src/client.py)
    - MCP server [src/server.py](#file:src/server.py)

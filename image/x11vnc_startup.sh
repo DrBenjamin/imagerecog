@@ -45,12 +45,12 @@ fi
     done
 ) &
 
-# Adding environment setup and app auto-start for Dateiablage
+# Adding environment setup and app auto-start for BenBox
 export PATH="$HOME/miniforge3/bin:$PATH"
 export DISPLAY=:1
 eval "$(conda shell.bash hook)"
-conda activate dateiablage
+conda activate BenBox
 
 xrdb $HOME/.Xresources 2>/dev/null
 startxfce4 &
-python /Python/Dateiablage/Dateiablage.py &
+python /Python/BenBox/BenBox.py &

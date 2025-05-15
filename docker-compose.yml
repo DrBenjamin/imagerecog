@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: dateiablage
+    container_name: BenBox
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:

@@ -9,4 +9,4 @@ x11vnc -display :$DISPLAY_NUM -forever -nopw -shared -bg
 novnc_proxy --vnc localhost:5900 --listen 6080 &
 
 # Starting Phoenix app (compiled version)
-./dist/Dateiablage/Dateiablage
+./dist/BenBox/BenBox
