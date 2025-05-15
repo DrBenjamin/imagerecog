@@ -73,6 +73,12 @@ USER ben
 # Copying environment.yml and creating conda environment
 COPY --chown=ben:ben environment.yml /home/ben/Dateiablage/environment.yml
 WORKDIR /home/ben/Dateiablage
+
+# Updating permissions for conda envs directory to fix NoWritableEnvsDirError
+USER root
+RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs
+
+USER ben
 RUN conda env create -f environment.yml && conda clean -afy
 
 # Setting conda environment variables
