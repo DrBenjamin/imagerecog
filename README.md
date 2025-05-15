@@ -1,8 +1,7 @@
 # BenBox
 
-**BenBox** is an Agent AI app which utilizes SSE-based
-[MCP](https://modelcontextprotocol.io/introduction)
-tools and includes a mobile Angular app.
+**BenBox** is an Agent AI app utilizing [MCP](https://modelcontextprotocol.io/introduction)
+tools with Angular mobile and Phoenix desktop app.
 
 **Why MCP?**
 
