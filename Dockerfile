@@ -74,7 +74,7 @@ USER ben
 COPY --chown=ben:ben environment.yml /home/ben/Dateiablage/environment.yml
 WORKDIR /home/ben/Dateiablage
 
-# Updating permissions for conda envs and pkgs directories to fix NoWritableEnvsDirError and NoWritablePkgsDirError
+# Updating permissions for conda envs and pkgs directories
 USER root
 RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs && \
     mkdir -p /opt/conda/pkgs && chmod -R 777 /opt/conda/pkgs
@@ -86,8 +86,9 @@ RUN conda env create -f environment.yml && conda clean -afy
 ENV CONDA_DEFAULT_ENV=benbox
 ENV PATH="/opt/conda/envs/benbox/bin:$PATH"
 
-# (Optional) Install requirements.txt with pip inside conda env if needed
-RUN if [ -f requirements.txt ]; then conda run -n benbox pip install -r requirements.txt; fi
+# Installing wxPython dependencies
+RUN python -m pip install --upgrade pip && \
+    python -m pip install --no-cache-dir "wxPython==4.2.2"
 
 # Building the Dateiablage app using PyInstaller (inside conda env)
 RUN conda run -n benbox python -m pip install --no-cache-dir pyinstaller
