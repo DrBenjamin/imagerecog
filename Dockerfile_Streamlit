@@ -3,18 +3,15 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 ENV DEBIAN_PRIORITY=high
 
-# Installing system dependencies and Miniforge first for better caching
+# Installing only minimal system dependencies for Streamlit
 RUN apt-get update && \
     apt-get -y upgrade && \
     apt-get -y install \
-    xvfb xterm xdotool scrot imagemagick sudo mutter x11vnc \
     build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev \
     libsqlite3-dev curl git libncursesw5-dev xz-utils tk-dev libxml2-dev \
     libxmlsec1-dev libffi-dev liblzma-dev net-tools netcat-openbsd software-properties-common \
-    libgtk-3-dev libgtk2.0-dev libgdk-pixbuf2.0-dev libgl1-mesa-dev \
-    freeglut3-dev libsm-dev libxrender-dev libxext-dev libxtst-dev libjpeg-dev libtiff-dev \
-    libpng-dev libnotify-dev libsdl1.2-dev pkg-config \
-    libwebkit2gtk-4.0-dev novnc xdg-utils epiphany-browser w3m && \
+    libjpeg-dev libtiff-dev libpng-dev libnotify-dev pkg-config \
+    xdg-utils w3m && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ENV USERNAME=ben
@@ -43,7 +40,7 @@ RUN ARCH=$(uname -m) && \
 ENV PATH="$CONDA_DIR/bin:$PATH"
 
 # Copying only environment.yml first for better cache
-COPY --chown=ben:ben environment.yml /home/ben/Dateiablage/environment.yml
+COPY --chown=ben:ben environment_streamlit.yml /home/ben/Dateiablage/environment_streamlit.yml
 
 # Updating permissions for conda envs and pkgs directories
 RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs && \
@@ -54,40 +51,11 @@ RUN mkdir -p /home/ben/.conda
 
 # Creating conda env before copying source for cache
 WORKDIR /home/ben/Dateiablage
-RUN conda env create -v -f environment.yml && conda clean -afy
+RUN conda env create -v -f environment_streamlit.yml && conda clean -afy
 
 # Setting conda environment variables
-ENV CONDA_DEFAULT_ENV=dateiablage
-ENV PATH="/opt/conda/envs/dateiablage/bin:$PATH"
-
-# Installing wxPython and PyInstaller only for desktop app
-RUN python -m pip install --upgrade pip && \
-    python -m pip install --no-cache-dir "wxPython==4.2.2" && \
-    python -m pip install --no-cache-dir pyinstaller
-
-# Copying the rest of the repo (after env is built)
-COPY --chown=ben:ben . /home/ben/Dateiablage
-
-# Building the Dateiablage app using PyInstaller (inside conda env)
-RUN conda run -n dateiablage python -m PyInstaller --noconfirm --clean Dateiablage.py
-
-ARG DISPLAY_NUM=1
-ARG HEIGHT=768
-ARG WIDTH=1024
-ENV DISPLAY_NUM=$DISPLAY_NUM
-ENV HEIGHT=$HEIGHT
-ENV WIDTH=$WIDTH
-
-# Installing noVNC and websockify as root (fixing permissions)
-USER root
-RUN git clone --branch v1.5.0 https://github.com/novnc/noVNC.git /opt/noVNC && \
-    git clone --branch v0.12.0 https://github.com/novnc/websockify /opt/noVNC/utils/websockify && \
-    ln -s /opt/noVNC/vnc.html /opt/noVNC/index.html
-
-ENV PATH="/opt/noVNC/utils:${PATH}"
-ENV DISPLAY=:1
-
-USER ben
+ENV CONDA_DEFAULT_ENV=benbox
+ENV PATH="/opt/conda/envs/benbox/bin:$PATH"
 
 # Installing MinIO mc CLI to $HOME/minio-binaries and add to PATH
 RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
@@ -97,10 +65,14 @@ RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
 
 ENV PATH="$PATH:/home/ben/minio-binaries"
 
-# Adding entrypoint.sh
+# Copying the rest of the repo (after env is built)
+COPY --chown=ben:ben . /home/ben/Dateiablage
+
+# Adding entrypoint.sh (if needed for Streamlit)
 USER root
 COPY entrypoint.sh /home/ben/Dateiablage/entrypoint.sh
 RUN chmod +x /home/ben/Dateiablage/entrypoint.sh
 USER ben
 
-ENTRYPOINT ["/home/ben/Dateiablage/entrypoint.sh"]
+# Default command for Streamlit container
+CMD ["python", "-m", "streamlit", "run", "app.py"]

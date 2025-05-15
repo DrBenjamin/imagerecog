@@ -6,8 +6,8 @@ runOnSave = true
 gatherUsageStats = false
 
 [theme]
-primaryColor="#FF4B4B"
-backgroundColor="#1e1e1e"
-secondaryBackgroundColor="#2b2a28"
-textColor="#FFFFFF"
+primaryColor="#eb2d34"
+backgroundColor="#FFFFFF"
+secondaryBackgroundColor="#f6f5f4"
+textColor="#2e3334"
 font="sans serif"

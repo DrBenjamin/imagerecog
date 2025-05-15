@@ -310,6 +310,7 @@ To run the application in a Docker container, use the following command:
 ```bash
 # Building the image
 docker build --no-cache -t dateiablage-vnc .
+docker build --no-cache -f Dockerfile_Streamlit -t streamlit .
 
 # Running the container
 docker run -it --rm -p 6080:6080 dateiablage-vnc

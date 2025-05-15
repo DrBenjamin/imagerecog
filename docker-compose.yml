@@ -7,12 +7,30 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "8501:8501"
       - "6080:6080"
     environment:
       - DISPLAY_NUM=1
       - HEIGHT=768
       - WIDTH=1024
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - MINIO_SECURE=${MINIO_SECURE}
+      - MINIO_BUCKET=${MINIO_BUCKET}
+    volumes:
+      - ./data:/home/ben/data
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile_Streamlit
+    container_name: streamlit
+    command: streamlit run app.py
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8501:8501"
+    environment:
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
