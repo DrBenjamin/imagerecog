@@ -8,7 +8,7 @@ services:
       - "host.docker.internal:host-gateway"
     ports:
       - "8501:8501"
-      - "9000:9000"
+      - "6080:6080"
     environment:
       - DISPLAY_NUM=1
       - HEIGHT=768
