@@ -50,9 +50,18 @@ USER root
 COPY entrypoint.sh /home/ben/Dateiablage/entrypoint.sh
 RUN chmod +x /home/ben/Dateiablage/entrypoint.sh
 
-# Installing Miniforge (conda-forge based) as root
+# Installing Miniforge (conda-forge based) as root, with architecture detection
+USER root
 ENV CONDA_DIR=/opt/conda
-RUN curl -sSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh && \
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        MINIFORGE_URL="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-aarch64.sh"; \
+    else \
+        echo "Unsupported architecture: $ARCH" && exit 1; \
+    fi && \
+    curl -sSL $MINIFORGE_URL -o miniforge.sh && \
     bash miniforge.sh -b -p $CONDA_DIR && \
     rm miniforge.sh && \
     $CONDA_DIR/bin/conda clean -afy
