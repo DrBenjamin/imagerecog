@@ -15,7 +15,7 @@ RUN apt-get update && \
     xdg-utils w3m && \
     # Adding Node.js (includes npm and npx) for MCP dev commands
     curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
+    apt-get install -y nodejs npm && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Creating user early for better cache
