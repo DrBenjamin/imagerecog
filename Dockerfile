@@ -56,9 +56,33 @@ USER ben
 # (Optional) Install requirements if Dateiablage has requirements.txt
 RUN if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
 
-# Building the Dateiablage app using PyInstaller
-RUN python -m pip install --no-cache-dir pyinstaller
-RUN python -m PyInstaller --noconfirm --clean Dateiablage.py
+# Installing Miniconda
+USER root
+ENV CONDA_DIR=/opt/conda
+RUN curl -sSL https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o miniconda.sh && \
+    bash miniconda.sh -b -p $CONDA_DIR && \
+    rm miniconda.sh && \
+    $CONDA_DIR/bin/conda clean -afy
+ENV PATH="$CONDA_DIR/bin:$PATH"
+
+# Switching back to the correct user
+USER ben
+
+# Copying environment.yml and creating conda environment
+COPY --chown=ben:ben environment.yml /home/ben/Dateiablage/environment.yml
+WORKDIR /home/ben/Dateiablage
+RUN conda env create -f environment.yml && conda clean -afy
+
+# Setting conda environment variables
+ENV CONDA_DEFAULT_ENV=benbox
+ENV PATH="/opt/conda/envs/benbox/bin:$PATH"
+
+# (Optional) Install requirements.txt with pip inside conda env if needed
+RUN if [ -f requirements.txt ]; then conda run -n benbox pip install -r requirements.txt; fi
+
+# Building the Dateiablage app using PyInstaller (inside conda env)
+RUN conda run -n benbox python -m pip install --no-cache-dir pyinstaller
+RUN conda run -n benbox python -m PyInstaller --noconfirm --clean Dateiablage.py
 
 ARG DISPLAY_NUM=1
 ARG HEIGHT=768
@@ -90,8 +114,8 @@ ENV PATH="$PATH:/home/ben/minio-binaries"
 
 RUN mc --help || true
 
-# Installing Streamlit
-RUN python -m pip install --no-cache-dir streamlit
+# Installing Streamlit (if not in environment.yml)
+RUN conda run -n benbox python -m pip install --no-cache-dir streamlit
 
-# Set entrypoint to run Streamlit app
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Set entrypoint to run Streamlit app using conda
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "benbox", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
