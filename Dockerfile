@@ -17,10 +17,10 @@ RUN apt-get update && \
     libwebkit2gtk-4.0-dev novnc xdg-utils epiphany-browser w3m && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Installing Python 3.11 and pip (skip pyenv for faster builds)
+# Installing Python 3.10 and pip (skip pyenv for faster builds)
 RUN apt-get update && \
-    apt-get install -y python3.11 python3.11-venv python3-pip && \
-    ln -sf /usr/bin/python3.11 /usr/local/bin/python && \
+    apt-get install -y python3.10 python3.10-venv python3-pip && \
+    ln -sf /usr/bin/python3.10 /usr/local/bin/python && \
     ln -sf /usr/bin/pip3 /usr/local/bin/pip
 
 RUN python -m pip install --upgrade pip && \
