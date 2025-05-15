@@ -17,16 +17,16 @@ RUN apt-get update && \
     libwebkit2gtk-4.0-dev novnc xdg-utils epiphany-browser w3m && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.10 and pip (skip pyenv for faster builds)
+# Installing Python 3.11 and pip (skip pyenv for faster builds)
 RUN apt-get update && \
-    apt-get install -y python3.10 python3.10-venv python3-pip && \
-    ln -sf /usr/bin/python3.10 /usr/local/bin/python && \
+    apt-get install -y python3.11 python3.11-venv python3-pip && \
+    ln -sf /usr/bin/python3.11 /usr/local/bin/python && \
     ln -sf /usr/bin/pip3 /usr/local/bin/pip
 
 RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir "wxPython==4.2.2"
 
-# Setup user
+# Setting user
 ENV USERNAME=ben
 ENV HOME=/home/$USERNAME
 RUN useradd -m -s /bin/bash -d $HOME $USERNAME
@@ -36,13 +36,13 @@ RUN echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER ben
 WORKDIR $HOME
 
-# Clone Dateiablage repository from branch v0.2.0
+# Cloning Dateiablage repository from branch v0.2.0
 # Forcing Docker not to use cache for repository clone step
 RUN --mount=type=cache,target=/var/cache/apt \
     rm -rf $HOME/Dateiablage && \
     git clone --branch v0.2.0 https://github.com/DrBenjamin/BenBox.git $HOME/Dateiablage
 
-# Setup working directory for Dateiablage
+# Setting up working directory for Dateiablage
 WORKDIR $HOME/Dateiablage
 
 # Adding entrypoint.sh to the image as root, before switching to USER ben
@@ -50,18 +50,11 @@ USER root
 COPY entrypoint.sh /home/ben/Dateiablage/entrypoint.sh
 RUN chmod +x /home/ben/Dateiablage/entrypoint.sh
 
-# Switching back to the correct user
-USER ben
-
-# (Optional) Install requirements if Dateiablage has requirements.txt
-RUN if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
-
-# Installing Miniconda
-USER root
+# Installing Miniforge (conda-forge based) as root
 ENV CONDA_DIR=/opt/conda
-RUN curl -sSL https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o miniconda.sh && \
-    bash miniconda.sh -b -p $CONDA_DIR && \
-    rm miniconda.sh && \
+RUN curl -sSL https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -o miniforge.sh && \
+    bash miniforge.sh -b -p $CONDA_DIR && \
+    rm miniforge.sh && \
     $CONDA_DIR/bin/conda clean -afy
 ENV PATH="$CONDA_DIR/bin:$PATH"
 
@@ -104,7 +97,7 @@ ENV DISPLAY=:1
 # Switching back to the correct user
 USER ben
 
-# Install MinIO mc CLI to $HOME/minio-binaries and add to PATH
+# Installing MinIO mc CLI to $HOME/minio-binaries and add to PATH
 RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
     --create-dirs \
     -o /home/ben/minio-binaries/mc && \
@@ -112,10 +105,5 @@ RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
 
 ENV PATH="$PATH:/home/ben/minio-binaries"
 
-RUN mc --help || true
-
-# Installing Streamlit (if not in environment.yml)
-RUN conda run -n benbox python -m pip install --no-cache-dir streamlit
-
-# Set entrypoint to run Streamlit app using conda
+# Setting entrypoint to run Streamlit app using conda
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "benbox", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
