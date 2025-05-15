@@ -11,8 +11,5 @@ x11vnc -display :$DISPLAY_NUM -forever -nopw -shared -bg
 # Starting noVNC
 novnc_proxy --vnc localhost:5900 --listen 6080 &
 
-# Starting MCP server, backend, and Streamlit app using run.sh
-/home/ben/Dateiablage/run.sh
-
 # Starting Phoenix app (compiled version)
 ./dist/Dateiablage/Dateiablage
