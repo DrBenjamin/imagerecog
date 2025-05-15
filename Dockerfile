@@ -80,7 +80,8 @@ RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs && \
     mkdir -p /opt/conda/pkgs && chmod -R 777 /opt/conda/pkgs
 
 USER ben
-RUN conda env create -f environment.yml && conda clean -afy
+RUN mkdir -p /home/ben/.conda
+RUN conda env create -v -f environment.yml && conda clean -afy
 
 # Setting conda environment variables
 ENV CONDA_DEFAULT_ENV=benbox
@@ -122,5 +123,5 @@ RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
 
 ENV PATH="$PATH:/home/ben/minio-binaries"
 
-# Setting entrypoint to run Streamlit app using conda
-ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "benbox", "streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Setting entrypoint
+ENTRYPOINT ["/home/ben/Dateiablage/entrypoint.sh"]
