@@ -29,6 +29,7 @@ services:
       - "host.docker.internal:host-gateway"
     ports:
       - "8501:8501"
+      - "6277:6277"
     environment:
       - MINIO_ENDPOINT=${MINIO_ENDPOINT}
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
