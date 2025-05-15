@@ -46,11 +46,6 @@ def on_preferences_open(self, event):
     # Calling the `on_preferences` method
     self.on_preferences(event)
 
-    # Calling the `on_browse_source` method
-    if g.mapping:
-        self.on_browse_source(event)
-        g.mapping = False
-
 # Creating the main frame
 class MyFrame(wx.Frame):
     def __init__(self, parent, title, size, config):
