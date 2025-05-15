@@ -1,18 +1,24 @@
 ### `src/minio_utils.py`
 ### # Utility functions for MinIO connection
-### Open-Source, hosted on https://github.com/DrBenjamin/Dateiablage
+### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 ## Modules
 import wx
+import src.globals as g
+import os
+import re
 from minio import Minio
 from minio.error import S3Error
-import src.globals as g
+from io import BytesIO
 
-# Method to connect to MinIO
+# Method to connect to Minio
 def connect_to_minio():
     try:
+        # Removing protocol and any path from endpoint (only host:port allowed)
+        endpoint = re.sub(r"^https?://", "", g.minio_endpoint, flags=re.IGNORECASE)
+        endpoint = endpoint.split("/")[0]  # Only keep host:port, remove any path
         client = Minio(
-            g.minio_endpoint,
+            endpoint,
             access_key=g.minio_access_key,
             secret_key=g.minio_secret_key,
             secure=g.minio_secure,  # Using HTTP or HTTPS
@@ -24,117 +30,51 @@ def connect_to_minio():
             f"Fehler beim aufbauen der MinIO-Verbindung: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
     return None
 
-# Method to create a new bucket
-def on_create_bucket(self, event):
-    dlg = wx.TextEntryDialog(self, "Bitte geben Sie den Namen für den neuen Bucket ein:", "Neuen Bucket erstellen")
-    if dlg.ShowModal() == wx.ID_OK:
-        new_bucket = dlg.GetValue().strip().lower()
-        if new_bucket:
-            import subprocess
-            try:
-                result = subprocess.run([
-                    "mc", "mb", f"myminio/{new_bucket}"
-                ], capture_output=True, text=True)
-                if result.returncode == 0:
-                    # Checking with mc ls if the bucket is present
-                    check_result = subprocess.run([
-                        "mc", "ls", f"myminio/{new_bucket}"
-                    ], capture_output=True, text=True)
-                    if check_result.returncode == 0:
-                        # Setting anonymous download policy
-                        anon_result = subprocess.run([
-                            "mc", "anonymous", "set", "download", f"myminio/{new_bucket}"
-                        ], capture_output=True, text=True)
-                        if anon_result.returncode == 0:
-                            wx.MessageBox(f"Bucket '{new_bucket}' wurde erfolgreich erstellt und für anonymen Download freigegeben.", "Erfolg", wx.OK | wx.ICON_INFORMATION)
-                        else:
-                            wx.MessageBox(f"Bucket wurde erstellt, aber anonyme Freigabe fehlgeschlagen: {anon_result.stderr}", "Warnung", wx.OK | wx.ICON_WARNING)
-
-                        # Refreshing and selecting the new bucket
-                        self.refresh_learning_ctrl_with_minio(select_bucket_name=new_bucket)
-                    else:
-                        wx.MessageBox(f"Bucket wurde scheinbar nicht erstellt (mc ls gibt Fehler): {check_result.stderr}", "Fehler", wx.OK | wx.ICON_ERROR)
-                else:
-                    wx.MessageBox(f"Fehler beim Erstellen des Buckets: {result.stderr}", "Fehler", wx.OK | wx.ICON_ERROR)
-            except Exception as e:
-                wx.MessageBox(f"Fehler beim Ausführen von mc: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
-    dlg.Destroy()
-
-# Method for deleting a bucket
-def on_remove_bucket(self, event):
+# Method to upload files to MinIO bucket
+def upload_files(minio_client, bucket_name, file_paths):
     """
-    Removing the selected MinIO bucket after user confirmation.
+    Uploading files to the specified MinIO bucket.
+
+    Args:
+        minio_client: Minio client instance.
+        bucket_name: Name of the bucket (str).
+        file_paths: List of file paths to upload.
     """
-    selected_index = self.learning_ctrl.GetFirstSelected()
-    if selected_index == -1:
-        wx.MessageBox(
-            "Bitte wählen Sie einen Bucket zum Löschen aus.",
-            "Kein Bucket ausgewählt",
-            wx.OK | wx.ICON_WARNING
-        )
-        return
-
-    bucket_display_name = self.learning_ctrl.GetItemText(selected_index, 0)
-    bucket_name = bucket_display_name.replace(' ', '-').lower()
-
-    dlg = wx.MessageDialog(
-        self,
-        f"Sind Sie sicher, dass Sie den Bucket '{bucket_display_name}' und alle darin enthaltenen Objekte löschen möchten?",
-        "Bucket löschen bestätigen",
-        wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING
-    )
-    if dlg.ShowModal() != wx.ID_YES:
-        dlg.Destroy()
-        return
-    dlg.Destroy()
-
-    try:
-        minio_client = connect_to_minio()
-        if minio_client is None:
-            wx.MessageBox(
-                "MinIO-Verbindung konnte nicht hergestellt werden.",
-                "Fehler",
-                wx.OK | wx.ICON_ERROR
+    # Normalizing bucket name before use
+    for file_path in file_paths:
+        file_name = os.path.basename(file_path)
+        with open(file_path, "rb") as f:
+            file_data = f.read()
+            minio_client.put_object(
+                bucket_name.lower().replace(' ', '-'),
+                file_name,
+                BytesIO(file_data),
+                len(file_data)
             )
-            return
 
-        # Deleting all objects in the bucket
-        objects = minio_client.list_objects(bucket_name, recursive=True)
-        for obj in objects:
-            minio_client.remove_object(bucket_name, obj.object_name)
-
-        minio_client.remove_bucket(bucket_name)
-
-        wx.MessageBox(
-            f"Bucket '{bucket_display_name}' wurde erfolgreich gelöscht.",
-            "Bucket gelöscht",
-            wx.OK | wx.ICON_INFORMATION
-        )
-
-        # Refreshing the bucket list and restoring selection
-        self.refresh_learning_ctrl_with_minio()
-        item_count = self.learning_ctrl.GetItemCount()
-        if item_count > 0:
-            # Selecting the next logical bucket (same index or previous if last was deleted)
-            new_index = selected_index if selected_index < item_count else item_count - 1
-            new_bucket_display = self.learning_ctrl.GetItemText(new_index, 0)
-            new_bucket_name = new_bucket_display.replace(' ', '-').lower()
-            self.refresh_learning_ctrl_with_minio(select_bucket_name=new_bucket_name)
-        else:
-            g.elearning_index = -1
-            g.minio_bucket_name = ""
-            from src.files import refresh_files_ctrl_with_minio
-            refresh_files_ctrl_with_minio(self)
-
+# Method to list buckets
+def list_buckets(minio_client):
+    try:
+        buckets = minio_client.list_buckets()
+        return [
+            bucket.name.upper()
+            for bucket in buckets
+        ]
     except S3Error as e:
         wx.MessageBox(
-            f"Fehler beim Löschen des Buckets: {e}",
-            "Fehler",
-            wx.OK | wx.ICON_ERROR
-        )
-    except Exception as e:
+            f"Fehler beim auflisten der MinIO-Buckets: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
+    return
+
+# Method to list objects in a bucket
+def list_objects(minio_client, bucket_name):
+    bucket_name = bucket_name.lower().replace(' ', '-')
+    try:
+        objects = minio_client.list_objects(bucket_name, recursive=True)
+        return [
+            obj.object_name
+            for obj in objects
+        ]
+    except S3Error as e:
         wx.MessageBox(
-            f"Unerwarteter Fehler beim Löschen des Buckets: {e}",
-            "Fehler",
-            wx.OK | wx.ICON_ERROR
-        )
+            f"Fehler beim auflisten der MinIO-Dateien: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
+    return

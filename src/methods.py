@@ -1,14 +1,12 @@
 ### `src/methods.py`
 ### Various methods for the Dateiablage application
-### Open-Source, hosted on https://github.com/DrBenjamin/Dateiablage
+### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 ## Modules
 import wx
 import webbrowser
 import src.globals as g
-from docx import Document
-from src.files import list_files
-from src.learning import display_learning
+import re
 
 # Method to handle the right click event
 def on_right_click(self, event):
@@ -103,29 +101,23 @@ def on_contact(self, event):
     mailto_link = "mailto:ben@seriousbenentertainment.org?subject=Supportanfrage&body=Hallo%20Support-Team"
     wx.LaunchDefaultBrowser(mailto_link)
 
-# Method to handle the Refresh menu item
-def on_refresh(self, event):
-    # Clearing the ctrl lists
-    self.learning_ctrl.DeleteAllItems()
-    self.tasks_ctrl.DeleteAllItems()
-
-    # Refreshing the ctrl lists
-    try:
-        if g.folder_path is not None:
-            list_files(self, g.folder_path)
-    except Exception as e:
-        print(f"Error: {e}")
-    try:
-        if g.df_elearning is not None:
-            display_learning(self, g.df_elearning)
-    except Exception as e:
-        print(f"Error: {e}")
-    try:
-        if g.df_tasks is not None:
-            on_import_tasks(self, None)
-    except Exception as e:
-        print(f"Error: {e}")
-
 # Method to handle the Exit menu item
 def on_exit(self, event):
     self.Close(True)
+
+def load_streamlit_webview(tasks_ctrl, selected_buckets):
+    """
+    Loading the Streamlit webview with the correct MinIO protocol, endpoint, and buckets.
+    Args:
+        tasks_ctrl: The wx.html2.WebView instance.
+        selected_buckets: List of selected bucket names (strings).
+    """
+
+    # Building the buckets query string
+    buckets_query = ",".join(selected_buckets) if isinstance(selected_buckets, list) else selected_buckets
+
+    # Removing any existing protocol from endpoint using regex
+    endpoint = re.sub(r"^https?://", "", g.streamlit_endpoint, flags=re.IGNORECASE)
+    protocol = "https" if g.streamlit_secure else "http"
+    url = f"{protocol}://{endpoint}/?embed=true&angular=true&query=5&bucket={buckets_query}"
+    tasks_ctrl.LoadURL(url)

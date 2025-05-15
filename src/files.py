@@ -1,32 +1,21 @@
 ### `src/files.py`
 ### Files Panel for the Dateiablage application
-### Open-Source, hosted on https://github.com/DrBenjamin/Dateiablage
+### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 ## Modules
 import wx
 import os
+import tempfile
+import shutil
 import subprocess
 import platform
-import xml.etree.ElementTree as ET
 import src.globals as g
 from minio.error import S3Error
 from io import BytesIO
-
-from src.minio_utils import connect_to_minio
-
-# Method to list objects in a bucket
-def list_objects(minio_client, bucket_name):
-    bucket_name = bucket_name.lower().replace(' ', '-')
-    try:
-        objects = minio_client.list_objects(bucket_name, recursive=True)
-        return [
-            obj.object_name
-            for obj in objects
-        ]
-    except S3Error as e:
-        wx.MessageBox(
-            f"Fehler beim auflisten der MinIO-Dateien: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
-    return
+from src.minio_utils import (
+    connect_to_minio,
+    list_objects
+)
 
 # Method to upload file
 def on_upload_file(self, event):
@@ -49,20 +38,12 @@ def on_upload_file(self, event):
             wx.MessageBox("Kein Bucket ausgewählt.", "Fehler", wx.OK | wx.ICON_ERROR)
             return
         try:
-            for file_path in file_paths:
-                file_name = os.path.basename(file_path)
-                with open(file_path, "rb") as f:
-                    file_data = f.read()
-                    minio_client.put_object(
-                        bucket_name,
-                        file_name,
-                        BytesIO(file_data),
-                        len(file_data)
-                    )
+            # Using the helper from minio_utils
+            from src.minio_utils import upload_files
+            upload_files(minio_client, bucket_name, file_paths)
             wx.MessageBox(f"{len(file_paths)} Datei(en) erfolgreich in den Bucket '{bucket_name}' hochgeladen.", "Upload abgeschlossen", wx.OK | wx.ICON_INFORMATION)
 
             # Refreshing file list and restoring bucket selection
-            from src.files import refresh_files_ctrl_with_minio
             refresh_files_ctrl_with_minio(self)
 
             # Restoring bucket selection in learning_ctrl if available
@@ -79,20 +60,7 @@ def on_upload_file(self, event):
     else:
         dialog.Destroy()
 
-# Method to upload files to MinIO bucket
-def upload_files(minio_client, bucket_name, files):
-    bucket_name = bucket_name.lower().replace(' ', '-')
-    for file in files:
-        # Reading file
-        file_content = file.read()
 
-        # Uploading to MinIO
-        minio_client.put_object(
-            bucket_name,
-            file.name,
-            BytesIO(file_content),
-            len(file_content)
-        )
 
 # Method to delete the selected file (object) from the selected MinIO bucket
 def on_delete_file(self, event):
@@ -108,7 +76,7 @@ def on_delete_file(self, event):
             if minio_client is None:
                 wx.MessageBox("MinIO-Verbindung konnte nicht hergestellt werden.", "Fehler", wx.OK | wx.ICON_ERROR)
                 return
-            minio_client.remove_object(bucket_name, object_name)
+            minio_client.remove_object(bucket_name.lower().replace(' ', '-'), object_name)
             wx.MessageBox(f"Datei '{object_name}' wurde gelöscht.", "Erfolg", wx.OK | wx.ICON_INFORMATION)
 
             # Refreshing file list
@@ -132,12 +100,38 @@ def on_file_activated(self, event):
         if minio_client is None:
             wx.MessageBox("MinIO-Verbindung konnte nicht hergestellt werden.", "Fehler", wx.OK | wx.ICON_ERROR)
             return
+
+        # Handling multi-selection: g.minio_bucket_name may be a list
         bucket_name = g.minio_bucket_name
         object_name = g.file_path
-        response = minio_client.get_object(bucket_name, object_name)
-        # Save to a temporary file
-        import tempfile
-        import shutil
+
+        # If bucket_name is a list, extract from file_path prefix
+        if isinstance(bucket_name, list):
+            # Expecting file_path in format "bucket/file"
+            if "/" in object_name:
+                bucket_name, object_name = object_name.split("/", 1)
+            else:
+                wx.MessageBox("Dateipfad ungültig für Multi-Bucket-Auswahl.", "Fehler", wx.OK | wx.ICON_ERROR)
+                return
+
+        # Ensuring bucket_name is valid (MinIO expects lowercase, hyphenated)
+        bucket_name = bucket_name.lower().replace(' ', '-')
+
+        # Avoiding double prefix in object_name (e.g. test/test/file.pdf)
+        if object_name.startswith(f"{bucket_name}/"):
+            object_name = object_name[len(bucket_name) + 1 :]
+
+        # Getting the object from MinIO
+        try:
+            response = minio_client.get_object(bucket_name, object_name)
+        except S3Error as e:
+            wx.MessageBox(
+                f"Datei konnte nicht geöffnet oder heruntergeladen werden: {e}\n\nbucket_name: {bucket_name}, object_name: {object_name}",
+                "Error", wx.OK | wx.ICON_ERROR
+            )
+            return
+
+        # Saving to a temporary file
         suffix = os.path.splitext(object_name)[1]
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
             shutil.copyfileobj(response, tmp_file)
@@ -201,3 +195,62 @@ def refresh_files_ctrl_with_minio(self):
     except Exception as e:
         wx.MessageBox(
             f"Fehler beim Laden der MinIO-Dateien: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
+
+# Adding a helper to handle multi-selection and update files/webview
+def on_learning_ctrl_selected(self, event):
+    """
+    Handling multi-selection in the learning_ctrl to show files from several buckets.
+    Always refreshes file list and reloads the webview with the selected buckets.
+    """
+    # Getting all selected bucket indexes
+    selected_indexes = []
+    idx = self.learning_ctrl.GetFirstSelected()
+    while idx != -1:
+        selected_indexes.append(idx)
+        idx = self.learning_ctrl.GetNextSelected(idx)
+
+    # Getting all selected bucket names (MinIO style)
+    selected_buckets = [
+        self.learning_ctrl.GetItemText(i, 0).replace(' ', '-').lower()
+        for i in selected_indexes
+    ]
+
+    # Setting global state for single or multi selection
+    if len(selected_buckets) == 1:
+        g.minio_bucket_name = selected_buckets[0]
+        g.elearning_index = selected_indexes[0]
+    else:
+        g.minio_bucket_name = selected_buckets
+        g.elearning_index = selected_indexes[0] if selected_indexes else 0
+
+    # Updating the file list to show all files from all selected buckets
+    files_combined = []
+    minio_client = None
+    try:
+        from src.minio_utils import connect_to_minio
+        minio_client = connect_to_minio()
+    except Exception:
+        pass
+    if minio_client:
+        from src.files import list_objects
+        for bucket in selected_buckets:
+            try:
+                files = list_objects(minio_client, bucket)
+                if files:
+                    # Prefix files with bucket name for clarity
+                    files_combined.extend([f"{bucket}/{f}" for f in files])
+            except Exception:
+                continue
+
+    # Setting and displaying combined files in the file_listbox
+    g.file_list = files_combined
+    self.file_listbox.Set(g.file_list)
+
+    # Reloading the webview with the actual buckets query
+    if hasattr(self, "tasks_ctrl") and hasattr(self, "HAS_WEBVIEW2") and self.HAS_WEBVIEW2:
+        try:
+            # Using the helper to load the Streamlit webview with the selected buckets
+            from src.methods import load_streamlit_webview
+            load_streamlit_webview(self.tasks_ctrl, selected_buckets)
+        except Exception:
+            pass

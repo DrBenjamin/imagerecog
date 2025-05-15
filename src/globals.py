@@ -1,35 +1,24 @@
 ### `src/globals.py`
 ### Global variables for the Dateiablage application
-### Open-Source, hosted on https://github.com/DrBenjamin/Dateiablage
+### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 ## Imports
-import os
+import wx
 
-# e-Learning
-file_path_elearning = None # storing the path to e-Learning definition file (CSV)
-df_elearning = None # storing the dataframe of the e-Learning definition file
-ticket_chosen = False # storing if a single ticket was chosen
+# Setting elearning explorer
 elearning_index = 0 # storing the index of the chosen item
 
-# Setting MinIO credentials from secrets or fallback
-minio_endpoint = os.environ.get("MINIO_ENDPOINT", "127.0.0.1:9000")
-minio_access_key = os.environ.get("MINIO_ACCESS_KEY", "<username>")
-minio_secret_key = os.environ.get("MINIO_SECRET_KEY", "<password>")
-minio_secure = os.environ.get("MINIO_SECURE", "False").lower() == "true"
-minio_bucket_name = os.environ.get("MINIO_BUCKET", "<bucket_name>")
-
-# Tasks
-df_tasks = None # storing the dataframe of the tasks file
-
-# File Explorer
+# Setting file explorer
 file_list = [] # storing the list of files in the File Explorer
-file_list_import = [] # storing the list of files to import in the eLearning
-file_path = None # storing the path to the selected file in the File Explorer
-folder_path = None # storing the path to the selected root folder for the File Explorer
-folder_path_import = None # storing the path to the root folder for the eLearning import
-folder_path_jira = None # storing the path to the JIRA tickets (multi file import)
-folder_path_elearning = None # storing the path to the new e-Learning folder
-root_folder_name = None # storing the name of the root folder for folder creation
 
-# Preferences
-mapping = False # needed for initial mapping of drive letter
+# Setting MinIO credentials from wx.Config (user preferences)
+config = wx.Config("Dateiablage")
+minio_endpoint = config.Read("minio_endpoint", "127.0.0.1:9000")
+minio_access_key = config.Read("minio_access_key", "<username>")
+minio_secret_key = config.Read("minio_secret_key", "<password>")
+minio_secure = config.ReadBool("minio_secure", False)
+minio_bucket_name = config.Read("minio_bucket_name", "<bucket_name>")
+
+# Setting embedded Streamlit credentials from wx.Config (user preferences)
+streamlit_endpoint = config.Read("streamlit_url", "localhost:8501")
+streamlit_secure = config.ReadBool("streamlit_secure", False)

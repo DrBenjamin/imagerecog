@@ -1,6 +1,6 @@
 ### `src/preferences.py`
 ### Preferences Panel for the Dateiablage application
-### Open-Source, hosted on https://github.com/DrBenjamin/Dateiablage
+### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
 ## Modules
 import wx # wxPython / Phoenix
@@ -30,173 +30,99 @@ class PreferencesPage(wx.StockPreferencesPage):
         panel = wx.Panel(parent)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # Adding preference control user settings
-        heading_user = wx.StaticText(panel, label="Jira")
-        font = heading_user.GetFont()
+        # Adding preference controls for MinIO
+        heading_minio = wx.StaticText(panel, label="MinIO Einstellungen")
+        font = heading_minio.GetFont()
         font.PointSize += 2
-        heading_user.SetFont(font)
-        sizer.Add(heading_user, 0, wx.ALL, 5)
-        # User choice
-        sizer.Add(wx.StaticText(panel,
-                                    label=f'Tickets für welchen User anzeigen?'),0, wx.ALL, 5)
-        self.user_choice = wx.Choice(panel, choices=["Alle", "Jayachandran Arhsuthdan", "Benjamin Groß", "Marko Werth", "Sandra Mann", "Christian.Weingartner@cgm.com"])
-        sizer.Add(self.user_choice, 0, wx.ALL, 5)
-        # Load saved state
-        user_state = self.config.Read("user_choice", "Alle")
-        self.user_choice.SetStringSelection(user_state)
-        # Bind event to save state
-        self.user_choice.Bind(wx.EVT_CHOICE, self.on_user_choice)
-        
-        # Ticket status choice
-        sizer.Add(wx.StaticText(panel,
-                                    label=f'Tickets mit welchem Status anzeigen?'),0, wx.ALL, 5)
-        self.status_choice = wx.Choice(panel, choices=["Alle", "Fertig", "In Bearbeitung", "Neu"])
-        sizer.Add(self.status_choice, 0, wx.ALL, 5)
-        # Load saved state
-        status_state = self.config.Read("status_choice", "Alle")
-        self.status_choice.SetStringSelection(status_state)
-        # Bind event to save state
-        self.status_choice.Bind(wx.EVT_CHOICE, self.on_status_choice)
+        heading_minio.SetFont(font)
+        sizer.Add(heading_minio, 0, wx.ALL, 5)
 
-        # Adding preference control XML import
-        heading_xml = wx.StaticText(panel, label="Import")
-        font = heading_xml.GetFont()
+        # MinIO endpoint
+        sizer.Add(wx.StaticText(panel, label="MinIO Endpoint"), 0, wx.ALL, 5)
+        self.minio_endpoint_ctrl = wx.TextCtrl(panel, value=self.config.Read("minio_endpoint", "127.0.0.1:9000"))
+        sizer.Add(self.minio_endpoint_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.minio_endpoint_ctrl.Bind(wx.EVT_TEXT, self.on_minio_endpoint)
+
+        # MinIO access key
+        sizer.Add(wx.StaticText(panel, label="MinIO Access Key"), 0, wx.ALL, 5)
+        self.minio_access_key_ctrl = wx.TextCtrl(panel, value=self.config.Read("minio_access_key", "<username>"))
+        sizer.Add(self.minio_access_key_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.minio_access_key_ctrl.Bind(wx.EVT_TEXT, self.on_minio_access_key)
+
+        # MinIO secret key
+        sizer.Add(wx.StaticText(panel, label="MinIO Secret Key"), 0, wx.ALL, 5)
+        self.minio_secret_key_ctrl = wx.TextCtrl(panel, value=self.config.Read("minio_secret_key", "<password>"), style=wx.TE_PASSWORD)
+        sizer.Add(self.minio_secret_key_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.minio_secret_key_ctrl.Bind(wx.EVT_TEXT, self.on_minio_secret_key)
+
+        # MinIO secure (http/https)
+        sizer.Add(wx.StaticText(panel, label="MinIO Secure (HTTPS aktivieren)"), 0, wx.ALL, 5)
+        self.minio_secure_checkbox = wx.CheckBox(panel, label="HTTPS verwenden")
+        self.minio_secure_checkbox.SetValue(self.config.ReadBool("minio_secure", False))
+        sizer.Add(self.minio_secure_checkbox, 0, wx.ALL, 5)
+        self.minio_secure_checkbox.Bind(wx.EVT_CHECKBOX, self.on_minio_secure)
+
+        # MinIO bucket name
+        sizer.Add(wx.StaticText(panel, label="MinIO Bucket Name"), 0, wx.ALL, 5)
+        self.minio_bucket_name_ctrl = wx.TextCtrl(panel, value=self.config.Read("minio_bucket_name", "<bucket_name>"))
+        sizer.Add(self.minio_bucket_name_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.minio_bucket_name_ctrl.Bind(wx.EVT_TEXT, self.on_minio_bucket_name)
+
+        # Adding Streamlit app preferences
+        heading_streamlit = wx.StaticText(panel, label="Streamlit")
+        font = heading_streamlit.GetFont()
         font.PointSize += 2
-        heading_xml.SetFont(font)
-        sizer.Add(heading_xml, 0, wx.ALL, 5)
-        # XML Import checkbox
-        sizer.Add(wx.StaticText(panel,
-                                    label=f'XML-Dateien statt Exceldokument für organisatorische Aufgaben?'),0, wx.ALL, 5)
-        self.xml_checkbox = wx.CheckBox(panel, label="XML Datei(en) verwenden!")
-        sizer.Add(self.xml_checkbox, 0, wx.ALL, 5)
-        # Load saved state
-        xml_state = self.config.ReadBool("xml_import_enabled", False)
-        self.xml_checkbox.SetValue(xml_state)
-        # Bind event to save state
-        self.xml_checkbox.Bind(wx.EVT_CHECKBOX, self.on_xml_checkbox)
+        heading_streamlit.SetFont(font)
+        sizer.Add(heading_streamlit, 0, wx.ALL, 5)
 
-        # XML Import for JIRA Tickets checkbox
-        sizer.Add(wx.StaticText(panel,
-                                    label=f'Einzelne Datei statt eine Datei pro Ticket verwenden?'),0, wx.ALL, 5)
-        self.xml_checkbox_jira = wx.CheckBox(panel, label="Eine Datei mit allen Tickets importieren!")
-        sizer.Add(self.xml_checkbox_jira, 0, wx.ALL, 5)
-        # Load saved state
-        xml_state_jira = self.config.ReadBool("xml_import_one_file", False)
-        self.xml_checkbox_jira.SetValue(xml_state_jira)
-        # Bind event to save state
-        self.xml_checkbox_jira.Bind(wx.EVT_CHECKBOX, self.on_xml_jira_checkbox)
+        # Streamlit app URL for embedding
+        sizer.Add(wx.StaticText(panel, label="Streamlit App URL (für Einbettung)"), 0, wx.ALL, 5)
+        self.streamlit_url_ctrl = wx.TextCtrl(panel, value=self.config.Read("streamlit_url", "localhost:8501"))
+        sizer.Add(self.streamlit_url_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.streamlit_url_ctrl.Bind(wx.EVT_TEXT, self.on_streamlit_url)
 
-        # Adding preference control srt converter
-        heading = wx.StaticText(panel, label="Untertitel Konverter")
-        font = heading.GetFont()
-        font.PointSize += 2
-        heading.SetFont(font)
-        sizer.Add(heading, 0, wx.ALL, 5)
-        # SRT Konverter checkbox
-        sizer.Add(wx.StaticText(panel,
-                                    label=f'Automatisches Überschreiben vorhandener `VTT`-Dateien?'),0, wx.ALL, 5)
-        self.srt_checkbox = wx.CheckBox(panel, label="Automatisches Überschreiben aktivieren!")
-        sizer.Add(self.srt_checkbox, 0, wx.ALL, 5)
-        # Load saved state
-        srt_state = self.config.ReadBool("srt_converter_overwrite", False)
-        self.srt_checkbox.SetValue(srt_state)
-        # Bind event to save state
-        self.srt_checkbox.Bind(wx.EVT_CHECKBOX, self.on_srt_checkbox)
-
-        # Adding preference control Drive mapping
-        if wx.Platform == "__WXMSW__":
-            heading_drive = wx.StaticText(panel, label="Virtuelles Laufwerk")
-            font = heading_drive.GetFont()
-            font.PointSize += 2
-            heading_drive.SetFont(font)
-            sizer.Add(heading_drive, 0, wx.ALL, 5)
-            # Drive mapping checkbox
-            self.drive_checkbox = wx.CheckBox(panel, label="Laufwerk mappen!")
-            sizer.Add(self.drive_checkbox, 0, wx.ALL, 5)
-            # Load saved state
-            drive_state = self.config.ReadBool("drive_mapping_enabled", False)
-            self.drive_checkbox.SetValue(drive_state)
-            # Bind event to save state
-            self.drive_checkbox.Bind(wx.EVT_CHECKBOX, self.on_drive_checkbox)
-            # Showing drive letter
-            if self.drive_checkbox.IsChecked() and self.config.Read("drive_mapping_letter") != "":
-                sizer.Add(wx.StaticText(panel,
-                                        label=f'Laufwerk {self.config.Read("drive_mapping_letter")} wurde gemappt.'),
-                        0, wx.ALL, 5)
-            else:
-                sizer.Add(wx.StaticText(panel,
-                                        label='Kein Laufwerk gemappt.'),
-                        0, wx.ALL, 5)
-
-        # Adding preference control date
-        heading = wx.StaticText(panel, label="Dateinamen")
-        font = heading.GetFont()
-        font.PointSize += 2
-        heading.SetFont(font)
-        sizer.Add(heading, 0, wx.ALL, 5)
-        # Date checkbox
-        sizer.Add(wx.StaticText(panel,
-                                    label=f'Welches Datum verwenden?'),0, wx.ALL, 5)
-        self.date_checkbox = wx.CheckBox(panel, label="Datum von heute aktivieren!")
-        sizer.Add(self.date_checkbox, 0, wx.ALL, 5)
-        # Load saved state
-        date_state = self.config.ReadBool("date_today", False)
-        self.date_checkbox.SetValue(date_state)
-        # Bind event to save state
-        self.date_checkbox.Bind(wx.EVT_CHECKBOX, self.on_date_checkbox)
+        # Streamlit secure (http/https)
+        sizer.Add(wx.StaticText(panel, label="Streamlit Secure (HTTPS aktivieren)"), 0, wx.ALL, 5)
+        self.streamlit_secure_checkbox = wx.CheckBox(panel, label="HTTPS verwenden")
+        self.streamlit_secure_checkbox.SetValue(self.config.ReadBool("streamlit_secure", False))
+        sizer.Add(self.streamlit_secure_checkbox, 0, wx.ALL, 5)
+        self.streamlit_secure_checkbox.Bind(wx.EVT_CHECKBOX, self.on_streamlit_secure)
 
         # Setting the sizer for the panel
         panel.SetSizer(sizer)
         return panel
 
-    # Method to handle the Preferences page user choice
-    def on_date_checkbox(self, event):
-        self.config.WriteBool("date_today", self.date_checkbox.IsChecked())
+    # Adding MinIO endpoint handler
+    def on_minio_endpoint(self, event):
+        self.config.Write("minio_endpoint", self.minio_endpoint_ctrl.GetValue())
         self.config.Flush()
 
-    # Method to handle the Preferences page user choice
-    def on_user_choice(self, event):
-        self.config.Write("user_choice", self.user_choice.GetString(self.user_choice.GetSelection()))
+    # Adding MinIO access key handler
+    def on_minio_access_key(self, event):
+        self.config.Write("minio_access_key", self.minio_access_key_ctrl.GetValue())
         self.config.Flush()
 
-    # Method to handle the Preferences page user choice
-    def on_status_choice(self, event):
-        self.config.Write("status_choice", self.status_choice.GetString(self.status_choice.GetSelection()))
+    # Adding MinIO secret key handler
+    def on_minio_secret_key(self, event):
+        self.config.Write("minio_secret_key", self.minio_secret_key_ctrl.GetValue())
         self.config.Flush()
 
-    # Method to handle the Preferences page xml checkbox
-    def on_xml_checkbox(self, event):
-        self.config.WriteBool("xml_import_enabled", self.xml_checkbox.IsChecked())
+    # Adding MinIO secure handler
+    def on_minio_secure(self, event):
+        self.config.WriteBool("minio_secure", self.minio_secure_checkbox.IsChecked())
         self.config.Flush()
 
-    # Method to handle the Preferences page xml checkbox
-    def on_xml_jira_checkbox(self, event):
-        self.config.WriteBool("xml_import_one_file", self.xml_checkbox_jira.IsChecked())
+    # Adding MinIO bucket name handler
+    def on_minio_bucket_name(self, event):
+        self.config.Write("minio_bucket_name", self.minio_bucket_name_ctrl.GetValue())
         self.config.Flush()
 
-    # Method to handle the Preferences page srt checkbox
-    def on_srt_checkbox(self, event):
-        self.config.WriteBool("srt_converter_overwrite", self.srt_checkbox.IsChecked())
+    # Adding Streamlit app URL handler
+    def on_streamlit_url(self, event):
+        self.config.Write("streamlit_url", self.streamlit_url_ctrl.GetValue())
         self.config.Flush()
 
-    # Method to handle the Preferences page Drive mapping checkbox
-    def on_drive_checkbox(self, event):
-        if self.drive_checkbox.IsChecked():
-            self.config.WriteBool("drive_mapping_enabled", self.drive_checkbox.IsChecked())
-            self.config.Flush()
-            g.mapping = True
-        else:
-            try:
-                # Unmapping the drive
-                subprocess.run(['subst', '/d', f"{self.config.Read('drive_mapping_letter')}:"])
-
-                # Deleting the registry entry `Virtual Drive`
-                subprocess.run(["reg", "delete", "HKCU\Software\Microsoft\Windows\CurrentVersion\Run", "/v", "Virtual Drive", "/f"])
-
-                # Setting the variable to default value
-                self.config.WriteBool("drive_mapping_enabled", self.drive_checkbox.IsChecked())
-                self.config.Write("drive_mapping_letter", "")
-                self.config.WriteBool("drive_mapping_enabled", self.drive_checkbox.IsChecked())
-                self.config.Flush()
-            except FileNotFoundError:
-                pass
+    # Adding Streamlit secure handler
+    def on_streamlit_secure(self, event):
+        self.config.WriteBool("streamlit_secure", self.streamlit_secure_checkbox.IsChecked())
+        self.config.Flush()

@@ -393,19 +393,37 @@ elif func_choice == "❄️ Navigator":
             for row in tables
             if row[1].startswith("LANGCHAIN")
         ]
+        # Updating: using all-uppercase for display_names and mapping
         display_names = [
-            name.removeprefix("LANGCHAIN_").title()
+            name.removeprefix("LANGCHAIN_").upper()
             for name in raw_tables
         ]
         name_map = dict(zip(display_names, raw_tables))
         options = ["Erstelle neue Tabelle"] + \
             display_names + ["Multi-Table-Selektion"]
 
+        # Getting bucket list from query params (comma-separated)
+        bucket_raw = st.query_params.get_all("bucket")
+        if bucket_raw:
+            bucket_list = [b.strip().upper() for b in bucket_raw[0].split(",") if b.strip()]
+        else:
+            bucket_list = []
+
+        # Updating: mapping string bucket param to index in options
+        if len(bucket_list) > 1:
+            selected_index = options.index("Multi-Table-Selektion")
+        else:
+            bucket_param = bucket_list[0] if bucket_list else None
+            if bucket_param and bucket_param in options:
+                selected_index = options.index(bucket_param)
+            else:
+                selected_index = 1
+
         # Adding a selectbox for the user to select the table
         selected_disp = st.selectbox(
             "Wähle die Tabelle(n)",
             options,
-            index=1,
+            index=selected_index,
             key="selected_table",
             on_change=_reset_vector_store
         )
@@ -426,7 +444,7 @@ elif func_choice == "❄️ Navigator":
                     st.error(f"Fehler beim Löschen der Tabelle: {e}")
         if selected_disp == "Erstelle neue Tabelle":
             new_disp = st.text_input(
-                "Tabellenname", value="TEST", on_change=_reset_vector_store)
+                "Tabellenname", value=st.query_params.get_all("bucket")[0].upper(), on_change=_reset_vector_store)
             st.session_state.option_embedding_model = st.selectbox(
                 "Wähle das Embedding-Modell", options=st.secrets["snowflake"]["embedding_models"],
                 index=0, key="embedding_model"
@@ -434,18 +452,27 @@ elif func_choice == "❄️ Navigator":
             st.session_state.option_vector_length = st.selectbox(
                 "Wähle die Vektorenlänge", [768, 1024], index=1, key="vector_length", disabled=True)
             if new_disp:
-                table_name = new_disp if new_disp.startswith(
-                    "LANGCHAIN_") else f"LANGCHAIN_{new_disp}"
+                # Setting table name to all uppercase and prefixing with LANGCHAIN_ if not present
+                table_name = new_disp.upper()
+                if not table_name.startswith("LANGCHAIN_"):
+                    table_name = f"LANGCHAIN_{table_name}"
             else:
                 table_name = "LANGCHAIN_TEST"
         else:
             if selected_disp == "Multi-Table-Selektion":
-                # Adding a multiselect for the user to select multiple tables
+                # Creating a list of valid defaults that exist in display_names
+                defaults = [b for b in bucket_list if b in display_names] if bucket_list else None
+
+                # Ensuring defaults is None if empty, to avoid Streamlit error
+                if defaults and len(defaults) > 0:
+                    default_multiselect = defaults
+                else:
+                    default_multiselect = None
+
                 table_display_selection = st.multiselect(
                     "Wähle mindestens 2 Tabellen",
                     options=display_names,
-                    default=display_names[:2] if len(
-                        display_names) >= 2 else display_names,
+                    default=default_multiselect,
                     key="multi_table_selection",
                     on_change=_reset_vector_store
                 )
@@ -498,7 +525,8 @@ elif func_choice == "❄️ Navigator":
                     st.error(f"Fehler beim Importieren des Chatverlaufs: {e}")
 
     # Showing the title
-    st.title(st.secrets["LLM"]["LLM_CHATBOT_NAME"])
+    if not st.session_state["IS_EMBED"]:
+        st.title(st.secrets["LLM"]["LLM_CHATBOT_NAME"])
 
     # Creating form for user input for new table
     if selected_disp == "Erstelle neue Tabelle":
@@ -513,15 +541,18 @@ elif func_choice == "❄️ Navigator":
 
             # Creating a mapping from display name to bucket name
             bucket_display_to_real = {
-                display: display.lower().replace(' ', '-')
+                display.upper(): display.lower().replace(' ', '-')
                 for display in options_offline_resources
             }
 
-            # Adding a selectbox for the user to select the MinIO bucket (display name)
+            # Adding a selectbox for the user to select the MinIO bucket (display name, UPPER)
             selected_bucket_display = st.selectbox(
-                "Dokumente", options_offline_resources
+                "Dokumente", [
+                    d.upper()
+                    for d in options_offline_resources
+                ]
             )
-            # Setting the actual bucket name in session state
+            # Setting the actual bucket name in session state (MinIO-compliant)
             st.session_state.option_offline_resources = bucket_display_to_real.get(selected_bucket_display, selected_bucket_display)
 
             # Adding a text input for the user to enter the URLs
@@ -769,12 +800,12 @@ elif func_choice == "❄️ Navigator":
                     for idx, doc in enumerate(st.session_state.response["context"]):
                         try:
                             tbl_name = doc.metadata.get("db_table")
-                            st.write(f"**DB-Tabelle**: {tbl_name.replace('LANGCHAIN_', '').title()}")
+                            st.write(f"**DB-Tabelle**: {tbl_name.replace('LANGCHAIN_', '').upper()}")
                         except Exception:
                             if isinstance(st.session_state.option_table, list):
-                                st.write(f"**DB-Tabelle**: {', '.join(st.session_state.option_table).replace('LANGCHAIN_', '').title()}")
+                                st.write(f"**DB-Tabelle**: {', '.join(st.session_state.option_table).replace('LANGCHAIN_', '').upper()}")
                             else:
-                                st.write(f"**DB-Tabelle**: {st.session_state.option_table.replace('LANGCHAIN_', '').title()}")
+                                st.write(f"**DB-Tabelle**: {st.session_state.option_table.replace('LANGCHAIN_', '').upper()}")
                         source = doc.metadata.get("source")
                         if source and isinstance(source, str) and source.startswith(("http://", "https://")):
                             filename = os.path.basename(source)

@@ -312,21 +312,8 @@ To run the application in a Docker container, use the following command:
 # Building the image
 docker build --no-cache -t dateiablage-vnc .
 
-# Setting environment variables
-export MINIO_ENDPOINT="127.0.0.1:9000"
-export MINIO_ACCESS_KEY="<username>"
-export MINIO_SECRET_KEY="<password>"
-export MINIO_SECURE="False"
-export MINIO_BUCKET="bucket_name"
-
 # Running the container
-docker run -it --rm -p 6080:6080 \
-    -e MINIO_ENDPOINT=$MINIO_ENDPOINT \
-    -e MINIO_ACCESS_KEY=$MINIO_ACCESS_KEY \
-    -e MINIO_SECRET_KEY=$MINIO_SECRET_KEY \
-    -e MINIO_SECURE=$MINIO_SECURE \
-    -e MINIO_BUCKET=$MINIO_BUCKET \
-    dateiablage-vnc
+docker run -it --rm -p 6080:6080 dateiablage-vnc
 ```
 
 ### OS specific notes
@@ -334,23 +321,7 @@ docker run -it --rm -p 6080:6080 \
 All executables are built with PyInstaller and need to be build on the target
 system.
 
-#### Windows
-
-To remove virtual drives manually, run the `subst` command:
-
-```bash
-# Adding folger example 
-subst D: "C:\Users\dateiablage\Documents\GitHub\Dateiablage"
-
-# Removing drive letter D:
-subst /d D:
-```
-
-#### MacOS
-
-To run the executable, you need to allow it after the first start in the Privacy
+To run the executable on MacOS, you need to allow it after the first start in the Privacy
 settings.
 
-#### Linux
-
-Add the icon manually to the executable.
+For Linux add the icon manually to the executable.
