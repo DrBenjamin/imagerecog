@@ -22,5 +22,5 @@ minio_secure = config.ReadBool("minio_secure", os.environ.get("MINIO_SECURE", "F
 minio_bucket_name = config.Read("minio_bucket_name", os.environ.get("MINIO_BUCKET", "<bucketname>"))
 
 # Setting embedded Streamlit credentials from wx.Config (user preferences)
-streamlit_endpoint = config.Read("streamlit_url", "127.0.0.1:8501")
+streamlit_endpoint = config.Read("streamlit_url", "http://streamlit:8501")
 streamlit_secure = config.ReadBool("streamlit_secure", False)

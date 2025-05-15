@@ -39,7 +39,7 @@ class PreferencesPage(wx.StockPreferencesPage):
 
         # MinIO endpoint
         sizer.Add(wx.StaticText(panel, label="MinIO Endpoint"), 0, wx.ALL, 5)
-        self.minio_endpoint_ctrl = wx.TextCtrl(panel, value=self.config.Read("minio_endpoint", "127.0.0.1:9000"))
+        self.minio_endpoint_ctrl = wx.TextCtrl(panel, value=self.config.Read("minio_endpoint", "host.docker.internal:9000"))
         sizer.Add(self.minio_endpoint_ctrl, 0, wx.ALL | wx.EXPAND, 5)
         self.minio_endpoint_ctrl.Bind(wx.EVT_TEXT, self.on_minio_endpoint)
 
@@ -64,7 +64,7 @@ class PreferencesPage(wx.StockPreferencesPage):
 
         # MinIO bucket name
         sizer.Add(wx.StaticText(panel, label="MinIO Bucket Name"), 0, wx.ALL, 5)
-        self.minio_bucket_name_ctrl = wx.TextCtrl(panel, value=self.config.Read("minio_bucket_name", "<bucket_name>"))
+        self.minio_bucket_name_ctrl = wx.TextCtrl(panel, value=self.config.Read("minio_bucket_name", "<bucketname>"))
         sizer.Add(self.minio_bucket_name_ctrl, 0, wx.ALL | wx.EXPAND, 5)
         self.minio_bucket_name_ctrl.Bind(wx.EVT_TEXT, self.on_minio_bucket_name)
 
@@ -77,7 +77,7 @@ class PreferencesPage(wx.StockPreferencesPage):
 
         # Streamlit app URL for embedding
         sizer.Add(wx.StaticText(panel, label="Streamlit App URL (für Einbettung)"), 0, wx.ALL, 5)
-        self.streamlit_url_ctrl = wx.TextCtrl(panel, value=self.config.Read("streamlit_url", "localhost:8501"))
+        self.streamlit_url_ctrl = wx.TextCtrl(panel, value=self.config.Read("streamlit_url", "http://streamlit:8501"))
         sizer.Add(self.streamlit_url_ctrl, 0, wx.ALL | wx.EXPAND, 5)
         self.streamlit_url_ctrl.Bind(wx.EVT_TEXT, self.on_streamlit_url)
 
