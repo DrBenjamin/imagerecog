@@ -38,6 +38,11 @@ ENV PATH="/home/ben/micromamba/envs/benbox/bin:$PATH"
 
 # Copying the rest of the repo (after env is built)
 COPY --chown=ben:ben . $HOME/BenBox
+USER root
+COPY run.sh $HOME/BenBox/run.sh
+RUN chmod +x $HOME/BenBox/run.sh
+RUN chown -R ben:ben $HOME/BenBox
+USER ben
 
-# Setting entrypoint to run.sh for better signal handling and PID 1
+# Updating entrypoint to use absolute path (environment variables are not expanded in ENTRYPOINT)
 ENTRYPOINT ["/home/ben/BenBox/run.sh"]
