@@ -40,7 +40,7 @@ WORKDIR $HOME
 # Forcing Docker not to use cache for repository clone step
 RUN --mount=type=cache,target=/var/cache/apt \
     rm -rf $HOME/Dateiablage && \
-    git clone --branch v0.2.0 https://github.com/DrBenjamin/Dateiablage.git $HOME/Dateiablage
+    git clone --branch v0.2.0 git@github.com:DrBenjamin/BenBox.git $HOME/Dateiablage
 
 # Setup working directory for Dateiablage
 WORKDIR $HOME/Dateiablage
