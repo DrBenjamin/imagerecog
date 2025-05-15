@@ -22,10 +22,13 @@ RUN useradd -m -s /bin/bash -d $HOME $USERNAME && \
 USER $USERNAME
 WORKDIR $HOME/BenBox
 
-# Copying only environment_streamlit.yml first for better cache
+# Copying requirements_streamlit.txt before creating the environment for pip install
+COPY --chown=ben:ben requirements_streamlit.txt $HOME/BenBox/requirements_streamlit.txt
+
+# Copying only environment_streamlit.yml after requirements_streamlit.txt for correct pip -r path
 COPY --chown=ben:ben environment_streamlit.yml $HOME/BenBox/environment_streamlit.yml
 
-# Creating conda env before copying source for cache
+# Creating conda env before copying the rest of the source for cache
 RUN micromamba create -y -n benbox -f environment_streamlit.yml && \
     micromamba clean -a -y
 
@@ -36,5 +39,5 @@ ENV PATH="/home/ben/micromamba/envs/benbox/bin:$PATH"
 # Copying the rest of the repo (after env is built)
 COPY --chown=ben:ben . $HOME/BenBox
 
-# Default command for Streamlit container
-CMD ["micromamba", "run", "-n", "benbox", "python", "-m", "streamlit", "run", "app.py"]
+# Setting entrypoint to run.sh for better signal handling and PID 1
+ENTRYPOINT ["/home/ben/BenBox/run.sh"]
