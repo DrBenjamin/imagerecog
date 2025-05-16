@@ -5,6 +5,8 @@ channels:
 dependencies:
   - python=3.11
   - pip
-  - streamlit
+  - streamlit>=1.45.1
   - pip:
+      - starlette==0.27.0
+      - sse-starlette==1.6.1
       - -r requirements_streamlit.txt
