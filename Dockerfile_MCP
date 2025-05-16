@@ -1,0 +1,19 @@
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /mcp
+
+# Copying requirements file
+COPY requirements_MCP.txt .
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements_MCP.txt
+
+# Copying the rest of the application code
+COPY . .
+
+# Exposing the port your MCP server will run on
+EXPOSE 8080
+
+# Command to run the MCP server
+CMD ["python", "src/server.py"]

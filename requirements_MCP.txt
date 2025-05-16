@@ -1,0 +1,17 @@
+streamlit
+watchdog
+openai
+openai-agents
+ollama
+azure-ai-projects
+azure-identity
+mysql-connector-python
+cryptography
+starlette
+uvicorn
+httpx
+fastapi
+requests
+pillow
+fastmcp
+jsonref

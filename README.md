@@ -311,10 +311,13 @@ To run the application in a Docker container, use the following command:
 # Building the images
 docker build --no-cache -t benbox-vnc .
 docker build --no-cache -f Dockerfile_Streamlit -t streamlit .
+docker build --no-cache -f Dockerfile_MCP -t mcp .
 
 # Running the container
 docker run -it --rm -p 6080:6080 benbox-vnc
 docker run -it --rm -p 8501:8501 streamlit
+docker run -it --rm -p 8080:8080 mcp
+```
 
 # or building the images using docker-compose
 docker-compose build --no-cache
