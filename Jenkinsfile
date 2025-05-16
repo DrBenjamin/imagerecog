@@ -6,11 +6,11 @@ pipeline {
         PATH = "$PATH:/usr/local/bin:/opt/homebrew/Caskroom/miniconda/base/bin/"
 
         // Setting environment variables for MinIO (can be set in Jenkins or .env file)
-        MINIO_ENDPOINT = credentials('minio-endpoint')
-        MINIO_ACCESS_KEY = credentials('minio-access-key')
-        MINIO_SECRET_KEY = credentials('minio-secret-key')
-        MINIO_SECURE = credentials('minio-secure')
-        MINIO_BUCKET = credentials('minio-bucket')
+        MINIO_ENDPOINT = credentials('MINIO_ENDPOINT')
+        MINIO_ACCESS_KEY = credentials('MINIO_ACCESS_KEY')
+        MINIO_SECRET_KEY = credentials('MINIO_SECRET_KEY')
+        MINIO_SECURE = credentials('MINIO_SECURE')
+        MINIO_BUCKET = credentials('MINIO_BUCKET')
     }
 
     stages {
