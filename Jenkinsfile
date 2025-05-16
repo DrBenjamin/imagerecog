@@ -26,15 +26,10 @@ pipeline {
                 // Updating to use relative path for docker-compose
                 sh 'docker-compose -f ../BenBox/docker-compose.yml build --no-cache'
                 sh 'docker-compose -f ../BenBox/docker-compose.yml --project-name benbox up -d'
+
                 // Pruning unused images to save space
                 sh 'docker image prune -fa'
             }
-        }
-    }
-    post {
-        always {
-            // Publishing test results
-            junit testResults: 'results.xml', skipPublishingChecks: true
         }
     }
 }
