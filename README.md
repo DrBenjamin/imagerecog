@@ -308,6 +308,25 @@ python -m PyInstaller BenBox.spec
 To run the application in a Docker container, use the following command:
 
 ```bash
+# Cleaning up before using Docker
+# Stopping all running containers
+docker-compose down
+
+# Removing all stopped containers, unused networks, images, and build cache
+docker system prune -af --volumes
+
+# Removing all dangling images
+docker image prune -f
+
+# Removing all unused Docker volumes
+docker volume prune -f
+
+# (Optional) Removing all Docker images related to BenBox
+docker images | grep benbox | awk '{print $3}' | xargs docker rmi -f
+
+# (Optional) Removing all Docker images related to streamlit or mcp
+docker images | grep -E 'streamlit|mcp' | awk '{print $3}' | xargs docker rmi -f
+
 # Building the images
 docker build --no-cache -t benbox-vnc .
 docker build --no-cache -f Dockerfile_Streamlit -t streamlit .
