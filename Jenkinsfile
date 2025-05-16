@@ -14,6 +14,13 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                # Checking out the v0.2.0 branch from the GitHub repository
+                git branch: 'v0.2.0', url: 'https://github.com/DrBenjamin/BenBox.git'
+            }
+        }
+
         stage('Test') {
             steps {
                 # Running pytest for all Python code (assumes tests are present)
