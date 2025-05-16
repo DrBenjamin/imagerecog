@@ -45,13 +45,17 @@ services:
     container_name: mcp
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data:/home/ben/data
+  
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile_DEV
+    container_name: dev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
-      - "8080:8080"
-    environment:
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
-      - MINIO_SECURE=${MINIO_SECURE}
-      - MINIO_BUCKET=${MINIO_BUCKET}
+      - "6274:6274"
     volumes:
       - ./data:/home/ben/data
