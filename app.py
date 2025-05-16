@@ -101,9 +101,8 @@ if "IS_EMBED" not in st.session_state:
 # Initializing a single global MCPClient and connect
 _mcp_client = MCPClient()
 
-# Ensuring we connect to the proper SSE endpoint
 # Setting MCP tool endpoint to the provided URL
-mcp_base_url = "http://212.227.102.172:8080"
+mcp_base_url = st.secrets["MCP"]["MCP_URL"]
 sse_url = f"{mcp_base_url}/sse"
 
 # Creating persistent event loop for MCP client
@@ -859,7 +858,7 @@ elif func_choice == "🤖 OpenAI Agents":
             conn_str="swedencentral.api.azureml.ms;fe22c842-64d1-4cb3-b434-bf57d79bf16f;elearning;benbox-agent"
         )
         toolset = ToolSet()
-        mcp_openapi_url = "http://212.227.102.172:8080/openapi.json"
+        mcp_openapi_url = f"{st.secrets['MCP']['MCP_URL']}/openapi.json"
         try:
             response = requests.get(mcp_openapi_url)
             response.raise_for_status()
