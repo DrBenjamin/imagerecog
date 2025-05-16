@@ -52,7 +52,6 @@ COPY --chown=ben:ben environment.yml /home/ben/BenBox/environment.yml
 RUN mkdir -p /opt/conda/envs && chmod -R 777 /opt/conda/envs && \
     mkdir -p /opt/conda/pkgs && chmod -R 777 /opt/conda/pkgs
 
-USER ben
 RUN mkdir -p /home/ben/.conda
 
 # Creating conda env before copying source for cache
@@ -69,12 +68,10 @@ RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir pyinstaller
 
 # Copying the rest of the repo (after env is built)
-USER root
 COPY --chown=ben:ben . /home/ben/BenBox
-RUN chmod 755 /home/ben/BenBox/entrypoint.sh
+RUN chmod 750 /home/ben/BenBox/entrypoint.sh
 
 # Building the BenBox app using PyInstaller (inside conda env)
-USER ben
 RUN conda run -n BenBox python -m PyInstaller --noconfirm --clean BenBox.py
 
 ARG DISPLAY_NUM=1
@@ -85,7 +82,6 @@ ENV HEIGHT=$HEIGHT
 ENV WIDTH=$WIDTH
 
 # Installing noVNC and websockify as root (fixing permissions)
-USER root
 RUN git clone --branch v1.5.0 https://github.com/novnc/noVNC.git /opt/noVNC && \
     git clone --branch v0.12.0 https://github.com/novnc/websockify /opt/noVNC/utils/websockify && \
     ln -s /opt/noVNC/vnc.html /opt/noVNC/index.html
@@ -94,7 +90,6 @@ ENV PATH="/opt/noVNC/utils:${PATH}"
 ENV DISPLAY=:1
 
 # Installing MinIO mc CLI to $HOME/minio-binaries and add to PATH
-USER ben
 RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
     --create-dirs \
     -o /home/ben/minio-binaries/mc && \
@@ -102,4 +97,4 @@ RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
 
 ENV PATH="$PATH:/home/ben/minio-binaries"
 
-ENTRYPOINT ["/home/ben/BenBox/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/home/ben/BenBox/entrypoint.sh"]
