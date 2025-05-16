@@ -317,7 +317,6 @@ docker build --no-cache -f Dockerfile_MCP -t mcp .
 docker run -it --rm -p 6080:6080 benbox-vnc
 docker run -it --rm -p 8501:8501 streamlit
 docker run -it --rm -p 8080:8080 mcp
-```
 
 # or building the images using docker-compose
 docker-compose build --no-cache
