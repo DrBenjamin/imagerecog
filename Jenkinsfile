@@ -24,7 +24,10 @@ pipeline {
         stage('Build & Deploy') {
             steps {
                 // Updating to use relative path for docker-compose
-                sh 'docker-compose -f ../BenBox/docker-compose.yml build --no-cache'
+                sh 'docker-compose -f ../BenBox/docker-compose.yml down --remove-orphans'
+                sh 'docker system prune -af'
+                sh 'docker volume prune -f'
+                sh 'docker-compose -f ../BenBox/docker-compose.yml build'
                 sh 'docker-compose -f ../BenBox/docker-compose.yml --project-name benbox up -d'
 
                 // Pruning unused images to save space
