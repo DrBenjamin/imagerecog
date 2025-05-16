@@ -332,13 +332,11 @@ docker images | grep -E 'streamlit|mcp' | awk '{print $3}' | xargs docker rmi -f
 docker build --no-cache -t benbox-vnc .
 docker build --no-cache -f Dockerfile_Streamlit -t streamlit .
 docker build --no-cache -f Dockerfile_MCP -t mcp .
-docker build --no-cache -f Dockerfile_DEV -t dev .
 
 # Running the container
 docker run -it --rm -p 6080:6080 benbox-vnc
 docker run -it --rm -p 8501:8501 streamlit
 docker run -it --rm mcp
-docker run -it --rm -p 6274:6274 dev
 
 # Using docker-compose
 # Building the images using docker-compose

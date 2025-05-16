@@ -47,15 +47,3 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./data:/home/ben/data
-  
-  dev:
-    build:
-      context: .
-      dockerfile: Dockerfile_DEV
-    container_name: dev
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    ports:
-      - "6274:6274"
-    volumes:
-      - ./data:/home/ben/data
