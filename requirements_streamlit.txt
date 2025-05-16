@@ -3,8 +3,10 @@ watchdog
 jsonref
 openai
 openai-agents
-azure-ai-projects
+azure-ai-agents==1.0.0
+azure-ai-projects==1.0.0b11
 azure-identity
+ollama
 mysql-connector-python
 cryptography
 snowflake  
