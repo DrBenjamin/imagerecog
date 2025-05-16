@@ -323,6 +323,9 @@ docker-compose build --no-cache
 
 # and running them in the background
 docker-compose up -d
+
+# and finally removing the containers
+docker-compose down
 ```
 
 ### OS specific notes
