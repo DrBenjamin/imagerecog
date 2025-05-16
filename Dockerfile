@@ -69,9 +69,12 @@ RUN python -m pip install --upgrade pip && \
     python -m pip install --no-cache-dir pyinstaller
 
 # Copying the rest of the repo (after env is built)
+USER root
 COPY --chown=ben:ben . /home/ben/BenBox
+RUN chmod 755 /home/ben/BenBox/entrypoint.sh
 
 # Building the BenBox app using PyInstaller (inside conda env)
+USER ben
 RUN conda run -n BenBox python -m PyInstaller --noconfirm --clean BenBox.py
 
 ARG DISPLAY_NUM=1
@@ -90,20 +93,13 @@ RUN git clone --branch v1.5.0 https://github.com/novnc/noVNC.git /opt/noVNC && \
 ENV PATH="/opt/noVNC/utils:${PATH}"
 ENV DISPLAY=:1
 
-USER ben
-
 # Installing MinIO mc CLI to $HOME/minio-binaries and add to PATH
+USER ben
 RUN curl -sSL https://dl.min.io/client/mc/release/linux-amd64/mc \
     --create-dirs \
     -o /home/ben/minio-binaries/mc && \
     chmod +x /home/ben/minio-binaries/mc
 
 ENV PATH="$PATH:/home/ben/minio-binaries"
-
-# Adding entrypoint.sh
-USER root
-COPY entrypoint.sh /home/ben/BenBox/entrypoint.sh
-RUN chmod +x /home/ben/BenBox/entrypoint.sh
-USER ben
 
 ENTRYPOINT ["/home/ben/BenBox/entrypoint.sh"]
