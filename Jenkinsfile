@@ -33,7 +33,7 @@ pipeline {
                     docker image prune -fa
                     docker system prune -af
                     docker volume prune -f
-                    docker-compose -f docker-compose.yml --no-cache build
+                    docker-compose -f docker-compose.yml build --no-cache
                     docker-compose -f docker-compose.yml --project-name benbox up -d
                 '''
             }
