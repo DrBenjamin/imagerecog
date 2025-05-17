@@ -25,13 +25,11 @@ pipeline {
             steps {
                 // Updating to use relative path for docker-compose
                 sh 'docker-compose -f ../BenBox/docker-compose.yml down --remove-orphans'
+                sh 'docker image prune -fa'
                 sh 'docker system prune -af'
                 sh 'docker volume prune -f'
                 sh 'docker-compose -f ../BenBox/docker-compose.yml build'
                 sh 'docker-compose -f ../BenBox/docker-compose.yml --project-name benbox up -d'
-
-                // Pruning unused images to save space
-                sh 'docker image prune -fa'
             }
         }
     }
