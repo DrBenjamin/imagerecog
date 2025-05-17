@@ -18,7 +18,7 @@ pipeline {
             steps {
                 // Using local repo and update it
                 sh '''
-                    cd /root/Python/Streamlit/BenBox
+                    cd /home/jenkins/BenBox
                     git pull origin v0.2.0
                 '''
             }
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 // Using local repo and building docker image and deploying
                 sh '''
-                    cd /root/Python/Streamlit/BenBox
+                    cd /home/jenkins/BenBox
                     docker-compose -f docker-compose.yml down --remove-orphans
                     docker image prune -fa
                     docker system prune -af
