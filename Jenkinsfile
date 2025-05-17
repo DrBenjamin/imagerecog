@@ -16,20 +16,26 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checking out the v0.2.0 branch from the GitHub repository
-                git branch: 'v0.2.0', url: 'https://github.com/DrBenjamin/BenBox.git'
+                // Using local repo and update it
+                sh '''
+                    cd /root/Python/Streamlit/BenBox
+                    git pull origin v0.2.0
+                '''
             }
         }
 
         stage('Build & Deploy') {
             steps {
-                // Updating to use relative path for docker-compose
-                sh 'docker-compose -f ../BenBox/docker-compose.yml down --remove-orphans'
-                sh 'docker image prune -fa'
-                sh 'docker system prune -af'
-                sh 'docker volume prune -f'
-                sh 'docker-compose -f ../BenBox/docker-compose.yml build'
-                sh 'docker-compose -f ../BenBox/docker-compose.yml --project-name benbox up -d'
+                // Using local repo and building docker image and deploying
+                sh '''
+                    cd /root/Python/Streamlit/BenBox
+                    docker-compose -f docker-compose.yml down --remove-orphans
+                    docker image prune -fa
+                    docker system prune -af
+                    docker volume prune -f
+                    docker-compose -f docker-compose.yml --no-cache build
+                    docker-compose -f docker-compose.yml --project-name benbox up -d
+                '''
             }
         }
     }
