@@ -327,7 +327,6 @@ docker images | grep benbox | awk '{print $3}' | xargs docker rmi -f
 # (Optional) Removing all Docker images related to streamlit or mcp
 docker images | grep -E 'streamlit|mcp' | awk '{print $3}' | xargs docker rmi -f
 
-# Using Docker to build the images
 # Building the images
 docker build --no-cache -t benbox-vnc .
 docker build --no-cache -f Dockerfile_Streamlit -t streamlit .
@@ -336,16 +335,15 @@ docker build --no-cache -f Dockerfile_MCP -t mcp .
 # Running the container
 docker run -it --rm -p 6080:6080 benbox-vnc
 docker run -it --rm -p 8501:8501 streamlit
-docker run -it --rm mcp
+docker run -it --rm -p 8080:8080 mcp
 
-# Using docker-compose
-# Building the images using docker-compose
+# or building the images using docker-compose
 docker-compose build --no-cache
 
-# Running them in the background
+# and running them in the background
 docker-compose up -d
 
-# Removing the containers
+# and finally removing the containers
 docker-compose down
 ```
 

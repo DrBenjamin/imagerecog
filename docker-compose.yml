@@ -17,8 +17,6 @@ services:
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
       - MINIO_SECURE=${MINIO_SECURE}
       - MINIO_BUCKET=${MINIO_BUCKET}
-    volumes:
-      - ./data:/home/ben/data
 
   streamlit:
     build:
@@ -35,8 +33,6 @@ services:
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
       - MINIO_SECURE=${MINIO_SECURE}
       - MINIO_BUCKET=${MINIO_BUCKET}
-    volumes:
-      - ./data:/home/ben/data
 
   mcp:
     build:
@@ -45,5 +41,3 @@ services:
     container_name: mcp
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    volumes:
-      - ./data:/home/ben/data
