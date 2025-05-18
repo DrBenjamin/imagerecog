@@ -229,7 +229,8 @@ cd ios/App
 pod install
 ```
 
-Add the following lines to the `Info.plist` file:
+Add the following lines to the `Info.plist` file (and change the `<ip-address>` to the
+IP address of the server):
 
 ```xml
 <key>NSAppTransportSecurity</key>
@@ -238,7 +239,7 @@ Add the following lines to the `Info.plist` file:
 		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>212.227.102.172</key>
+			<key><ip-address></key>
 			<dict>
 				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
 				<true/>

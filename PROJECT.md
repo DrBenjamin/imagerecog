@@ -86,7 +86,7 @@
    with a standardized data source will be much easier and would require fewer human
    resources.
 
-   ![Stakeholder Map](../../src/assets/SM.png)
+   ![Stakeholder Map](https://github.com/DrBenjamin/BenBox/blob/v0.2.0/src/assets/SM.png?raw=true)
    Figure 1: Stakeholder Map (created by Dall·e 3)
 
 **2. Business case and justification**
@@ -145,7 +145,7 @@
    different language needs of healthcare providers in different regions.
    Below is an exemplary user journey:
 
-   ![User Journey](../../src/assets/user_journey.png)
+   ![User Journey](https://github.com/DrBenjamin/BenBox/blob/2199c1e8506e80b8d33da21e8d9faa980e0f495a/src/assets/user_journey.png?raw=true)
    Figure 2: User Journey (created by Dall·e 3)
 
 **3. Regulation**

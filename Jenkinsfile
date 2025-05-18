@@ -24,6 +24,17 @@ pipeline {
             }
         }
 
+        stage('Test (Pytest)') {
+            steps {
+                sh '''
+                    cd /home/jenkins/BenBox
+                    source /opt/homebrew/Caskroom/miniconda/base/bin/activate benbox || source ~/miniconda3/bin/activate benbox || true
+                    python -m pip install -r requirements_streamlit.txt
+                    python -m pytest --maxfail=1 --disable-warnings
+                '''
+            }
+        }
+
         stage('Build & Deploy') {
             steps {
                 // Using local repo and building docker image and deploying

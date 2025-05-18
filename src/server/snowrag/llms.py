@@ -11,7 +11,7 @@ from langchain_core.messages import AIMessage
 from snowflake import snowpark
 from snowflake.connector import DictCursor
 from snowflake.connector.connection import SnowflakeConnection
-from snowflake.cortex import Complete
+
 logger = logging.getLogger(__name__)
 
 # Setting the user agent for Snowflake

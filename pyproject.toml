@@ -1,3 +1,7 @@
+[tool.pytest.ini_options]
+addopts = "-ra -q"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
 [project]
 name = "imagerecog"
 version = "0.1.0"
