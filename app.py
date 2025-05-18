@@ -273,13 +273,13 @@ if not st.session_state["IS_EMBED"]:
     )
 else:
     if st.session_state.query == 0:
-        func_choice = "🌌 Static Image"
-    elif st.session_state.query == 1:
-        func_choice = "🏞️ Variable Image"
-    elif st.session_state.query == 2:
-        func_choice = "💻 Review Code"
-    elif st.session_state.query == 3:
         func_choice = "🌍 Country code Lookup"
+    elif st.session_state.query == 1:
+        func_choice = "🌌 Static Image"
+    elif st.session_state.query == 2:
+        func_choice = "🏞️ Variable Image"
+    elif st.session_state.query == 3    :
+        func_choice = "💻 Review Code"
     elif st.session_state.query == 4:
         func_choice = "🩻 Image Recognition"
     elif st.session_state.query == 5:
@@ -287,7 +287,38 @@ else:
     else:
         func_choice = "🤖 OpenAI Agents"
 
-if func_choice == "🌌 Static Image":
+
+if func_choice == "🌍 Country code Lookup":
+    if not st.session_state["IS_EMBED"]:
+        st.title("🌍 Country code Lookup")
+    with st.form("country_code_form"):
+        country_code = st.text_input("Country Code")
+        submitted = st.form_submit_button("Lookup Country Code")
+    if submitted:
+        if not country_code:
+            st.warning("Please enter a country code.")
+        else:
+            with st.spinner("Looking up country code via MCP..."):
+                async def _invoke():
+                    result = await _mcp_client.session.call_tool(
+                        "get_country_name",
+                        {"country_code": country_code}
+                    )
+                    return result
+                try:
+                    execution = asyncio.run_coroutine_threadsafe(_invoke(), _mcp_loop).result()
+                    content = execution.content
+
+                    # Handling both TextContent and plain string
+                    if isinstance(content, (list, tuple)) and content:
+                        country_name = getattr(content[0], 'text', content[0])
+                        st.success(f"Der Ländername für den Ländercode '{country_code}' ist **{country_name}**.")
+                    else:
+                        st.warning(f"Kein Ländername für den Ländercode '{country_code}' gefunden.")
+                except Exception as e:
+                    st.error(f"Lookup failed: {e}")
+
+elif func_choice == "🌌 Static Image":
     if not st.session_state["IS_EMBED"]:
         st.title("🌌 Static Image")
     if st.button("Fetch Image"):
@@ -331,33 +362,6 @@ elif func_choice == "💻 Review Code":
             feedback = call_mcp_generic("review_code", {"code": code_input})
         st.write("**Review Feedback:**")
         st.code(feedback)
-
-elif func_choice == "🌍 Country code Lookup":
-    if not st.session_state["IS_EMBED"]:
-        st.title("🌍 Country code Lookup")
-    with st.form("country_code_form"):
-        country_code = st.text_input("Country Code")
-        submitted = st.form_submit_button("Lookup Country Code")
-    if submitted:
-        if not country_code:
-            st.warning("Please enter a country code.")
-        else:
-            with st.spinner("Looking up country code via MCP..."):
-                async def _invoke():
-                    result = await _mcp_client.session.call_tool(
-                        "get_country_name",
-                        {"country_code": country_code}
-                    )
-                    return result
-                try:
-                    execution = asyncio.run_coroutine_threadsafe(_invoke(), _mcp_loop).result()
-                    content = execution.content
-
-                    # Handling both TextContent and plain string
-                    country_name = getattr(content[0], 'text', content[0]) if isinstance(content, (list, tuple)) else str(content)
-                    st.success(f"Der Ländername für den Ländercode '{country_code}' ist **{country_name}**.")
-                except Exception as e:
-                    st.error(f"Lookup failed: {e}")
 
 elif func_choice == "🩻 Image Recognition":
     if not st.session_state["IS_EMBED"]:

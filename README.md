@@ -3,7 +3,7 @@
 **BenBox** is an Agent AI app utilizing [MCP](https://modelcontextprotocol.io/introduction)
 tools with Angular mobile and Phoenix desktop app.
 
-[Read the project summary](#file:PROJECT.md).
+[Read the project summary](PROJECT.md).
 
 **Why MCP?**
 

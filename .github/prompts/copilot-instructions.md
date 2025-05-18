@@ -2,7 +2,10 @@
 
 Dearest Copilot,
 this project is an Agent AI app utilizing
-MCP (Model Context Protocol) tools. The agent system uses the approaches from:
+MCP (Model Context Protocol) tools. A full description of the project
+you will find here [PROJECT.md](#file:PROJECT.md).
+
+The agent system uses the approaches from:
 
 - [Agents Using Azure AI Foundry](https://github.com/Azure-Samples/get-started-with-ai-agents)
 - [Agent Development Kit](https://google.github.io/adk-docs/)
