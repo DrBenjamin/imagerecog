@@ -27,6 +27,7 @@ pipeline {
         stage('Test (Pytest)') {
             steps {
                 sh '''
+                    export PATH="$PATH:/root/miniforge3/condabin/"
                     cd /home/jenkins/BenBox
                     conda run -n benbox python -m pytest --maxfail=1 --disable-warnings
                 '''
