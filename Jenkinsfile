@@ -28,7 +28,7 @@ pipeline {
             steps {
                 sh '''
                     cd /home/jenkins/BenBox
-                    /root/miniforge3/condabin/conda run -n benbox python -m pytest --maxfail=1 --disable-warnings
+                    $HOME/miniforge3/condabin/conda run -n BenBox python -m pytest --maxfail=1 --disable-warnings
                 '''
             }
         }

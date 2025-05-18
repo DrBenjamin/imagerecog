@@ -3,11 +3,11 @@ addopts = "-ra -q"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 [project]
-name = "imagerecog"
-version = "0.1.0"
-description = "SSE-based MCP Server and Client"
+name = "BenBox"
+version = "0.2.0"
+description = "Agentic AI ChatBot"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "anthropic>=0.45.1",
     "argparse>=1.4.0",
