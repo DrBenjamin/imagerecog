@@ -6,6 +6,7 @@ All notable changes to the Agentic AI app.
 - Added DevOPs
   - Docker integration
   - Jenkins pipeline
+  - Pytests
 - Added mobile App
     - Angular mobile app
 - Added Phoenix desktop app
