@@ -35,7 +35,7 @@ pipeline {
             post {
                 always {
                     // Publishing PyTest JUnit XML results from workspace
-                    junit '/home/jenkins/BenBox/test.xml'
+                    junit 'test.xml'
                 }
             }
         }
