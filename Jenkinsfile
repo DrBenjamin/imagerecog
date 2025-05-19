@@ -29,11 +29,12 @@ pipeline {
                 sh '''
                     cd /home/jenkins/BenBox
                     $HOME/miniforge3/condabin/conda run -n BenBox python -m pytest --maxfail=1 --disable-warnings --junitxml=test.xml
+                    cp /home/jenkins/BenBox/test.xml $WORKSPACE/test.xml
                 '''
             }
             post {
                 always {
-                    // Publishing PyTest JUnit XML results
+                    // Publishing PyTest JUnit XML results from workspace
                     junit '/home/jenkins/BenBox/test.xml'
                 }
             }
