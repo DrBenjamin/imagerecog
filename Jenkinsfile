@@ -28,8 +28,14 @@ pipeline {
             steps {
                 sh '''
                     cd /home/jenkins/BenBox
-                    $HOME/miniforge3/condabin/conda run -n BenBox python -m pytest --maxfail=1 --disable-warnings
+                    $HOME/miniforge3/condabin/conda run -n BenBox python -m pytest --maxfail=1 --disable-warnings --junitxml=test.xml
                 '''
+            }
+            post {
+                always {
+                    // Publishing PyTest JUnit XML results
+                    junit '/home/jenkins/BenBox/test.xml'
+                }
             }
         }
 
