@@ -69,6 +69,9 @@ Change configuration and add the OpenAI API key in the
 # LLM Provider
 LLM_LOCAL = "False"  # `False` for local Ollama model, `True` for OpenAI API
 
+# Storage Settings
+USE_SNOWFLAKE = "True"  # Use Snowflake for file storage instead of local filesystem
+
 # MCP API
 [MCP]
 MCP_URL = "http://127.0.0.1:8080"
@@ -86,6 +89,16 @@ AZURE_OPENAI_API_KEY = "<your-azure-openai-api-key>"
 AZURE_OPENAI_ENDPOINT = "<your-azure-openai-endpoint>"
 AZURE_OPENAI_MODEL = "<your-azure-openai-model>" # e.g. gpt-4.1
 AZURE_OPENAI_API_VERSION = "<your-api-version>" # e.g. 2024-02-15-preview
+
+# Snowflake Configuration
+[SNOWFLAKE]
+ACCOUNT = "<your-snowflake-account>"
+USER = "<your-snowflake-username>"
+PASSWORD = "<your-snowflake-password>"
+WAREHOUSE = "<your-snowflake-warehouse>"
+DATABASE = "<your-snowflake-database>"
+SCHEMA = "<your-snowflake-schema>"
+STAGE = "<your-snowflake-stage-name>"
 ```
 
 ### Ollama
@@ -131,6 +144,38 @@ docker push <docker hub user name>BenBox:latest
 Now the MCP docker can be added in
 [VS Code](https://code.visualstudio.com/docs/copilot/chat/mcp-servers) or any
 other MCP client like Claude Desktop.
+
+### Snowflake Stage Integration
+
+BenBox supports using Snowflake Stage for file storage instead of the local filesystem. 
+To configure Snowflake integration:
+
+1. Set up a Snowflake account and create a stage to store your files
+2. Upload your image files to the Snowflake stage:
+   ```sql
+   -- Create a stage if it doesn't exist
+   CREATE STAGE IF NOT EXISTS benbox_files;
+   
+   -- Put files into the stage
+   PUT file:///path/to/Image.png @benbox_files;
+   ```
+3. Configure the Snowflake connection in your `.streamlit/st.secrets.toml` file:
+   ```ini
+   # Enable Snowflake storage
+   USE_SNOWFLAKE = "True"
+   
+   # Snowflake Configuration
+   [SNOWFLAKE]
+   ACCOUNT = "<your-snowflake-account>"
+   USER = "<your-snowflake-username>"
+   PASSWORD = "<your-snowflake-password>"
+   WAREHOUSE = "<your-snowflake-warehouse>"
+   DATABASE = "<your-snowflake-database>"
+   SCHEMA = "<your-snowflake-schema>"
+   STAGE = "<your-snowflake-stage-name>"
+   ```
+
+4. If you want to disable Snowflake and use local storage, set `USE_SNOWFLAKE = "False"` in your configuration.
 
 ## Usage
 
