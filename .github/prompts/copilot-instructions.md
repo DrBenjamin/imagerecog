@@ -11,15 +11,28 @@ The agent system uses the approaches from:
 - [Agent Development Kit](https://google.github.io/adk-docs/)
 - [A Practical Guide to Building Agents](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf)
 
-The backend is a Streamlit app that serves as a client to
+**The backend:**
+
+A Streamlit app that serves as a client to
 the MCP server tools. It has an inbuild RAG (retrieval-augmented generation)
 system to store and retrieve documents as vectors for similarity search.
 
-An Angular mobile app is also included which utilizes the Streamlit client
+**The frontend is a two-part system:**
+
+1. An Angular mobile app is also included which utilizes the Streamlit client
 application (as iframe embedded).
 
-Also there is a desktop app which manages the files and works with Cloud blod storage.
+2. A desktop app which manages the files and works with Cloud blob storage.
 It can be run locally or in the cloud.
+
+**DevOps/DataOps:**
+
+The project includes DevOps and DataOps tools for
+- Docker: [docker-compose.yml](#file:docker-compose.yml), [Dockerfile](#file:Dockerfile), [Dockerfile_Streamlit](#file:Dockerfile_Streamlit), 
+  [Dockerfile_MCP](#file:Dockerfile_MCP)
+- Jenkins: [Jenkinsfile](#file:Jenkinsfile)
+- Pytest: [tests/test_app.py](#file:tests/test_app.py)
+- dbt: [dbt_project.yml](#file:dbt_project.yml)
 
 When generating code snippets or explanations, please follow these guidelines:
 

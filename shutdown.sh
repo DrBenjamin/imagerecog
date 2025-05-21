@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # Defining ports to shutdown
-ports="6274 8080 8501"
+ports="6274"
 
 # Shutting down services
 for port in $ports; do

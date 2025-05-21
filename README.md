@@ -182,6 +182,41 @@ llamalink
 Then change the `MCP_URL` in the `.streamlit/st.secrets.toml` file to
 `http://localhost:11434`.
 
+### dbt
+
+To install dbt, use the following command:
+
+```bash
+# Installing dbt in the conda environment
+python -m pip install dbt-core dbt-snowflake
+
+# Installing the dbt dependencies
+dbt deps
+
+# Running the dbt project
+dbt run
+dbt test
+
+# Creating dbt documentation
+dbt docs generate
+```
+
+Then run the following command to create the database and tables:
+
+```bash
+# Creating the database and tables
+dbt run --models staging
+```
+
+### Pytest
+
+To run the tests, use the following command:
+
+```bash
+# Running the tests
+pytest -v --tb=short --disable-warnings --maxfail=1
+```
+
 ## Usage
 
 Test bytes for an image to test on MCP Inspector (running on
@@ -343,7 +378,7 @@ docker push <username>/mcp:latest
 # Running the containers
 docker run -it --rm -p 6080:6080 benbox-vnc
 docker run -it --rm -p 8501:8501 streamlit
-docker run -it --rm mcp
+docker run -it --rm -p 8080:8080 mcp
 
 # Using docker-compose
 # Building the images using docker-compose

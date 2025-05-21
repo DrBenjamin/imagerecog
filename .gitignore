@@ -35,3 +35,16 @@ BenBox.app
 _internal/*
 BenBox
 PROJECT.pdf
+
+# dbt artifacts and secrets
+dbt_packages/
+target/
+dbt_modules/
+logs/
+manifest.json
+run_results.json
+profiles.yml
+.env
+
+# dbt secrets
+.dbt/profiles.yml
