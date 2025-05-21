@@ -16,6 +16,8 @@ logging.getLogger("langchain").setLevel(logging.ERROR)
 logging.basicConfig(level=logging.INFO)
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+# Import Completion as Complete to fix NameError with Snowflake PARSE_DOCUMENT function
+from openai import Completion as Complete
 
 # Setting the page config
 st.set_page_config(
