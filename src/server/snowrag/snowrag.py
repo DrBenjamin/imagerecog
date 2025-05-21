@@ -2,8 +2,8 @@
 ### Snowflake RAG on Snow MCP tool
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
-import os
 import streamlit as st
+import os
 import logging
 from snowflake.snowpark import Session
 logger = logging.getLogger(__name__)

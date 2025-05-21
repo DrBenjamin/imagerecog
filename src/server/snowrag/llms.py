@@ -2,16 +2,15 @@
 ### LLM class for Snowflake
 ### Open-Source, hosted on https://github.com/DrBenjamin/BenBox
 ### Please reach out to ben@seriousbenentertainment.org for any questions
-import logging
 import os
 from typing import Any, List, Mapping, Optional
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 from langchain_core.language_models.llms import LLM
-from langchain_core.messages import AIMessage
 from snowflake import snowpark
+from snowflake.cortex import Complete
 from snowflake.connector import DictCursor
 from snowflake.connector.connection import SnowflakeConnection
-
+import logging
 logger = logging.getLogger(__name__)
 
 # Setting the user agent for Snowflake

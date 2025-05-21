@@ -41,3 +41,5 @@ services:
     container_name: mcp
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    ports:
+      - "8080:8080"

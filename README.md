@@ -14,7 +14,7 @@ an SSE-based server and clients can be decoupled processes
 "cloud-native" use-cases compared to the STDIO-based pattern where the client
 itself spawns the server as a subprocess.
 
-## Setup of the backend
+## Setup
 
 Install the required packages and the MCP server and client:
 
@@ -61,7 +61,7 @@ lsof -i :8080
 lsof -i :8501
 ```
 
-## Setup of Azure
+### Setup of Azure
 
 To configure the Azure OpenAI API, you need to install the Azure CLI and
 Azure Dev CLI. Use the following commands to install them:
@@ -88,7 +88,7 @@ azd auth login
 azd auth login --use-device-code
 ```
 
-## Setup of MinIO
+### Setup of MinIO
 
 To allow public (anonymous) access to a specific bucket, use the following command:
 
@@ -278,7 +278,7 @@ brew install minio/stable/mc
 sudo apt install minio-client
 
 # Setting up the MinIO alias
-mc alias set myminio http://212.227.102.172:9000 minioadmin --insecure
+mc alias set myminio http://<ip-address>:9000 minioadmin --insecure
 ```
 
 ### Execution
@@ -336,7 +336,11 @@ docker build --no-cache -t benbox-vnc .
 docker build --no-cache -f Dockerfile_Streamlit -t streamlit .
 docker build --no-cache -f Dockerfile_MCP -t mcp .
 
-# Running the container
+# Uploading MCP image to Docker Hub
+docker tag mcp <username>/mcp:latest
+docker push <username>/mcp:latest
+
+# Running the containers
 docker run -it --rm -p 6080:6080 benbox-vnc
 docker run -it --rm -p 8501:8501 streamlit
 docker run -it --rm mcp
@@ -361,3 +365,12 @@ To run the executable on MacOS, you need to allow it after the first start in th
 settings.
 
 For Linux add the icon manually to the executable.
+
+## Misc
+
+Some other notes:
+
+```bash
+# Creating PDF from PROJECT.md file
+pandoc PROJECT.md -o PROJECT.pdf --pdf-engine=pdflatex
+```

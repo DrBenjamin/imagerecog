@@ -18,6 +18,7 @@ import fnmatch
 import logging
 import warnings
 import asyncio
+import uuid
 from typing import List, Union
 from PIL import Image
 from src.client import MCPClient
@@ -33,7 +34,7 @@ from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.runnables import RunnableLambda
 from langchain_core.documents import Document
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
-from langchain_community.document_loaders import WebBaseLoader, Docx2txtLoader, CSVLoader, PyPDFLoader, TextLoader
+from langchain_community.document_loaders import WebBaseLoader#, Docx2txtLoader, CSVLoader, PyPDFLoader, TextLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from typing import List
 from src.server.minio import (
@@ -587,7 +588,7 @@ elif func_choice == "❄️ Navigator":
 
                             def load(self) -> List[Document]:
                                 """
-                                Load all files matching the glob pattern in the MinIO bucket.
+                                Loading all files matching the glob pattern in the MinIO bucket using Snowflake Cortex PARSE_DOCUMENT.
                                 :return: List of Document objects loaded from the files.
                                 """
                                 import tempfile
@@ -613,29 +614,43 @@ elif func_choice == "❄️ Navigator":
                                                     st.warning(f"Fehler beim Herunterladen von MinIO: {e}")
                                                     continue
 
-                                                # Checking file type and loading accordingly
-                                                if local_path.endswith(".docx"):
-                                                    loader = Docx2txtLoader(file_path=local_path)
-                                                elif local_path.endswith(".csv"):
-                                                    loader = CSVLoader(file_path=local_path)
-                                                elif local_path.endswith(".pdf"):
-                                                    loader = PyPDFLoader(file_path=local_path)
-                                                elif local_path.endswith(".txt"):
-                                                    if os.path.basename(local_path) == "questions.txt":
-                                                        continue
-                                                    loader = TextLoader(file_path=local_path)
-                                                else:
-                                                    continue
+                                                # Using Snowflake Cortex PARSE_DOCUMENT to extract text
+                                                try:
+                                                    # Creating a new connection for each parse (or reuse as needed)
+                                                    ctx = snowflake_connection.cursor()
+                                                    with open(local_path, "rb") as f:
+                                                        file_bytes = f.read()
 
-                                                st.markdown(f"{os.path.basename(local_path)}")
-                                                docs = loader.load()  # type: ignore
-                                                for d in docs:
-                                                    if "page" not in d.metadata:
-                                                        d.metadata["page"] = 0
-                                                    # Setting MinIO URL as source
-                                                    minio_url = f"{st.secrets['MinIO']['endpoint']}/{self.bucket_name}/{object_name}"
-                                                    d.metadata["source"] = minio_url
-                                                documents.extend(docs)
+                                                    # Uploading file to Snowflake stage (if needed, else use PUT)                                                    
+                                                    stage_name = "@GOOGLE_CLOUD"
+                                                    stage_file = f"{uuid.uuid4().hex}_{os.path.basename(local_path)}"
+                                                    put_sql = f"PUT file://{local_path} {stage_name}/{stage_file} OVERWRITE=TRUE"
+                                                    ctx.execute(put_sql)
+
+                                                    # Running PARSE_DOCUMENT
+                                                    parse_sql = f"SELECT PARSE_DOCUMENT('{stage_name}/{stage_file}') AS parsed;"
+                                                    ctx.execute(parse_sql)
+                                                    result = ctx.fetchone()
+                                                    if result and result[0]:
+                                                        parsed = result[0]
+
+                                                        # Extracting text from the parsed result
+                                                        text = parsed.get('text', '') if isinstance(parsed, dict) else str(parsed)
+
+                                                        # Creating a Document object (LangChain)
+                                                        minio_url = f"{st.secrets['MinIO']['endpoint']}/{self.bucket_name}/{object_name}"
+                                                        doc = Document(page_content=text, metadata={
+                                                            "source": minio_url,
+                                                            "filename": os.path.basename(local_path),
+                                                            "page": 0
+                                                        })
+                                                        documents.append(doc)
+                                                    else:
+                                                        st.warning(f"PARSE_DOCUMENT returned no result for {object_name}")
+                                                    ctx.close()
+                                                except Exception as e:
+                                                    st.warning(f"Fehler bei PARSE_DOCUMENT für {object_name}: {e}")
+                                                    continue
 
                                 # Iterating over all URLs
                                 st.markdown("**URLs**")
@@ -656,10 +671,7 @@ elif func_choice == "❄️ Navigator":
                             connection=snowflake_connection, model=st.session_state.option_embedding_model
                         )
 
-                        # Setting the folder path to the parent directory of the current
-                        # working directory
-                        # folder = os.path.abspath(os.path.join(
-                        #     os.getcwd(), '..', st.session_state.option_offline_resources))
+                        # Setting the online resources
                         urls = st.session_state.online_resources.split(',')
                         st.session_state.loader = CustomDirectoryLoader(
                             urls=urls,

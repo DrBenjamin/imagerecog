@@ -1,6 +1,7 @@
 # Summary of the project
 
-**1. Introduction:**
+**1. Introduction**
+
    Healthcare is a complex and sensitive sector where services are typically non-transferable,
    non-storable, and delivered at the point of consumption (Horwitz et al., 2005). These
    services vary in profitability, making it essential to deliver less profitable ones as efficiently
@@ -14,6 +15,7 @@
    guidance for effective use.
 
 **1.1 Value Proposition**
+
    The BenBox ChatBot is a cutting-edge solution designed to revolutionize the
    integration and retrieval of digital educational materials within healthcare institutions. By
    leveraging advanced technologies such as Snowflake's scalable database, which offers a
@@ -30,6 +32,7 @@
    safety.
 
 **1.2 Problem**
+
    Educators, staff and students often find it difficult to relate the learning objectives and
    assessment methods resulting from the conceptual framework of an educational program
    to the day-to-day work in a clinical facility (Melrose Sherri et al., 2021). Also considering
@@ -66,6 +69,7 @@
    developed.
 
 **1.3 Stakeholders**
+
    The proposed solution offers distinct advantages for key stakeholder groups within the
    healthcare sector. In this case, the focus is on the hospital environment and not on external
    interest groups such as politicians, who have considerable influence (Kapiriri & Razavi,
@@ -90,6 +94,7 @@
    Figure 1: Stakeholder Map (created by Dall·e 3)
 
 **2. Business case and justification**
+
    The BenBox ChatBot addresses the urgent need for a centralized and intuitive
    platform to manage digital educational materials in healthcare institutions. By simplifying
    access to training resources, it significantly reduces training time and costs. At the same
@@ -105,6 +110,7 @@
    burden.
 
 **2.1 Design Goals**
+
    The BenBox ChatBot was developed with several key objectives in mind to meet the
    specific needs of healthcare facilities. At its core, the system focuses on centralizing
    educational resources, creating a unified knowledge base that consolidates unstructured
@@ -118,11 +124,12 @@
    property the hospital has stored there.
 
 **2.2 Development Approach**
+
    The development of the ChatBot follows a structured and iterative approach to ensure that
    it meets the needs of stakeholders and integrates smoothly into clinical workflows. It
    adheres strictly to best practices (cf. Dhanush Kumar, 2025; OpenAI Inc., 2025) and
    established standards such as the Model Context Protocol (MCP), enabling seamless
-   integration of diverse tooling during LLM inference (ANTHROP\C PBC, 2025b).
+   integration of diverse tooling during LLM inference (ANTHROP\\C PBC, 2025b).
    The process has already begun with requirements gathering through interviews with clinical
    staff, educators, managers and the IT department at a particular clinic to identify key needs
    and challenges. Based on these findings, a proof-of-concept multi agent prototype, as
@@ -134,11 +141,12 @@
    effective and can be adapted to changing requirements.
 
 **2.3 Usability and Accessibility**
+
    User-friendliness and accessibility are at the heart of the development of the BenBox
    ChatBot. The application will have an intuitive interface that allows users to navigate and
    access educational materials with minimal training. It will comply with established
    accessibility standards to ensure effective use by people with disabilities. For instance, a
-   guided software assistant, as ANTHROP\C PBC demos in 2025 with “computer use” agent,
+   guided software assistant, as ANTHROP\\C PBC demos in 2025 with “computer use” agent,
    will be implemented, to teach frontline staff directly on the system while they are on duty.
    To support mobile healthcare, the ChatBot will be fully optimized for mobile devices,
    enabling access to content on the go. In addition, multilingual support will consider the
@@ -149,6 +157,7 @@
    Figure 2: User Journey (created by Dall·e 3)
 
 **3. Regulation**
+
    The successful integration and use of the BenBox ChatBot in healthcare facilities
    requires compliance with several legal, ethical and data protection regulations. To ensure
    compliance, the project is working closely with regulators to obtain the necessary
@@ -162,6 +171,7 @@
    environment.
 
 **3.1 Legal**
+
    The BenBox ChatBot must operate within a clearly defined legal framework to ensure
    its safe and compliant use in the healthcare sector. Medical devices are subject to the EU
    Medical Device Regulation (MDR) as Jankovič & Nikolić (2024) are discussing. The stringent
@@ -176,6 +186,7 @@
    legally compliant system.
 
 **3.2 Ethical**
+
    Ethical considerations are central to the development and deployment of the Snow-on-
    RAG ChatBot. To promote fairness, the AI algorithms must be rigorously tested to identify
    and mitigate potential biases in the delivery of educational materials. Transparency and
@@ -184,6 +195,7 @@
    Kakarala & Kumar Rongali, 2025).
 
 **3.3 Privacy and Data Security**
+
    Privacy and data security are fundamental to the development and operation of the Snow-
    on-RAG ChatBot. Strong encryption protocols are implemented to protect data both at rest
    and in transit, ensuring that sensitive information remains secure. Robust access controls,
@@ -210,10 +222,10 @@ GmbH. [https://aiqualityhub.com/en/news/blog-en/a-milestone-for-ai-in-medicine/]
 
 AMBOSS SE. (2025). AMBOSS & ChatGPT. [https://www.amboss.com/int/gpt](https://www.amboss.com/int/gpt)
 
-ANTHROP\C PBC. (2025a). Computer use (beta) - Anthropic.
+ANTHROP\\C PBC. (2025a). Computer use (beta) - Anthropic.
 [https://docs.anthropic.com/en/docs/agents-and-tools/computer-use](https://docs.anthropic.com/en/docs/agents-and-tools/computer-use)
 
-ANTHROP\C PBC. (2025b). Introduction - Model Context Protocol.
+ANTHROP\\C PBC. (2025b). Introduction - Model Context Protocol.
 [https://modelcontextprotocol.io/introduction](https://modelcontextprotocol.io/introduction)
 
 Asgodom, J. (2023). Healthcare Content Management System.
