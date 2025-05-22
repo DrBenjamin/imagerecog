@@ -5,12 +5,20 @@ pipeline {
     environment {
         PATH = "$PATH:/usr/local/bin:/opt/homebrew/Caskroom/miniconda/base/bin/"
 
-        // Setting environment variables for MinIO (can be set in Jenkins or .env file)
+        // Setting environment variables for MinIO (set in Jenkins credentials)
         MINIO_ENDPOINT = credentials('MINIO_ENDPOINT')
         MINIO_ACCESS_KEY = credentials('MINIO_ACCESS_KEY')
         MINIO_SECRET_KEY = credentials('MINIO_SECRET_KEY')
         MINIO_SECURE = credentials('MINIO_SECURE')
         MINIO_BUCKET = credentials('MINIO_BUCKET')
+
+        // Setting environment variables for Snowflake (set in Jenkins credentials)
+        SNOWFLAKE_USER = credentials('SNOWFLAKE_USER')
+        SNOWFLAKE_ACCOUNT = credentials('SNOWFLAKE_ACCOUNT')
+        SNOWFLAKE_WAREHOUSE = credentials('SNOWFLAKE_WAREHOUSE')
+        SNOWFLAKE_DATABASE = credentials('SNOWFLAKE_DATABASE')
+        SNOWFLAKE_SCHEMA = credentials('SNOWFLAKE_SCHEMA')
+        SNOWFLAKE_ROLE = credentials('SNOWFLAKE_ROLE')
     }
 
     stages {

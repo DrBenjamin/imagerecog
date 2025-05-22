@@ -7,6 +7,168 @@ import wx
 import webbrowser
 import src.globals as g
 import re
+from src.minio_utils import (
+    connect_to_minio,
+    list_buckets
+)
+from src.snowflake_utils import (
+    connect_to_snowflake,
+    list_all_stages
+)
+
+# Method to refresh and display Snowflake stages or MinIO buckets in the learning_ctrl
+def refresh_ctrls(self, select_bucket_name=None):
+    """
+    Refreshing and displaying Snowflake stages or MinIO buckets in the learning_ctrl.
+    Optionally selects a bucket/stage by name after refresh.
+    """
+    try:
+        if getattr(g, "snowflake", False):
+            # Displaying all Snowflake stages
+            conn = connect_to_snowflake()
+            stages = list_all_stages(conn)
+            display_learning(self, stages)
+
+            # Clearing all selections before selecting the intended one
+            for idx in range(self.learning_ctrl.GetItemCount()):
+                self.learning_ctrl.SetItemState(idx, 0, wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED)
+
+            # Setting the correct stage selection logic
+            selected_idx = 0
+            target_stage = None
+            if select_bucket_name:
+                target_stage = select_bucket_name.upper()
+            elif hasattr(g, "snowflake_stage") and g.snowflake_stage:
+                target_stage = g.snowflake_stage.upper()
+            elif stages:
+                target_stage = stages[0].upper()
+
+            if target_stage and target_stage in [s.upper() for s in stages]:
+                selected_idx = [s.upper() for s in stages].index(target_stage)
+            elif stages:
+                selected_idx = 0
+                target_stage = stages[0]
+
+            if stages:
+                g.elearning_index = selected_idx
+                g.snowflake_stage = target_stage
+                self.learning_ctrl.SetItemState(
+                    selected_idx,
+                    wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED,
+                    wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED
+                )
+                self.learning_ctrl.EnsureVisible(selected_idx)
+        else:
+            # MinIO buckets
+            if not g.minio_endpoint:
+                wx.MessageBox(
+                    "MinIO-Endpunkt ist nicht gesetzt. Bitte tragen Sie einen gültigen Wert in der Konfiguration ein.",
+                    "Fehler",
+                    wx.OK | wx.ICON_ERROR
+                )
+                return
+
+            minio_client = connect_to_minio()
+            if minio_client is None:
+                wx.MessageBox(
+                    "MinIO-Verbindung konnte nicht hergestellt werden.",
+                    "Fehler",
+                    wx.OK | wx.ICON_ERROR
+                )
+                return
+            buckets = list_buckets(minio_client)
+            if buckets is None:
+                buckets = []
+            display_learning(self, buckets)
+
+            for idx in range(self.learning_ctrl.GetItemCount()):
+                self.learning_ctrl.SetItemState(idx, 0, wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED)
+
+            selected_idx = 0
+            target_bucket = None
+            if select_bucket_name:
+                target_bucket = select_bucket_name.upper()
+            elif g.minio_bucket_name:
+                target_bucket = g.minio_bucket_name.upper()
+
+            if target_bucket and target_bucket in buckets:
+                selected_idx = buckets.index(target_bucket)
+            elif buckets:
+                selected_idx = 0
+                target_bucket = buckets[0]
+
+            if buckets:
+                g.elearnin,g_index = selected_idx
+                g.minio_bucket_name = target_bucket
+                self.learning_ctrl.SetItemState(
+                    selected_idx,
+                    wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED,
+                    wx.LIST_STATE_SELECTED | wx.LIST_STATE_FOCUSED
+                )
+                self.learning_ctrl.EnsureVisible(selected_idx)
+    except Exception as e:
+        wx.MessageBox(
+            f"Fehler beim Laden der Buckets/Stages: {e}", "Fehler", wx.OK | wx.ICON_ERROR)
+
+# Adding a helper to handle multi-selection and update files/webview
+def on_learning_ctrl_selected(self, event):
+    """
+    Handling multi-selection in the learning_ctrl to show files from several
+    buckets/stages.
+    Always refreshes file list and reloads the webview with the selected
+    buckets/stages.
+    """
+    # Getting all selected bucket indexes
+    selected_indexes = []
+    idx = self.learning_ctrl.GetFirstSelected()
+    while idx != -1:
+        selected_indexes.append(idx)
+        idx = self.learning_ctrl.GetNextSelected(idx)
+
+    # Getting all selected bucket names (MinIO style)
+    selected_buckets = [
+        self.learning_ctrl.GetItemText(i, 0).replace(' ', '-').lower()
+        for i in selected_indexes
+    ]
+
+    # Setting global state for single or multi selection
+    if len(selected_buckets) == 1:
+        g.minio_bucket_name = selected_buckets[0]
+        g.elearning_index = selected_indexes[0]
+    else:
+        g.minio_bucket_name = selected_buckets
+        g.elearning_index = selected_indexes[0] if selected_indexes else 0
+
+    # Updating the file list to show all files from all selected buckets
+    files_combined = []
+    minio_client = None
+    try:
+        from src.minio_utils import list_objects
+        minio_client = connect_to_minio()
+    except Exception:
+        pass
+    if minio_client:
+        for bucket in selected_buckets:
+            try:
+                files = list_objects(minio_client, bucket)
+                if files:
+                    # Prefix files with bucket name for clarity
+                    files_combined.extend([f"{bucket}/{f}" for f in files])
+            except Exception:
+                continue
+
+    # Setting and displaying combined files in the file_listbox
+    g.file_list = files_combined
+    self.file_listbox.Set(g.file_list)
+
+    # Reloading the webview with the actual buckets query
+    if hasattr(self, "tasks_ctrl") and hasattr(self, "HAS_WEBVIEW2") and self.HAS_WEBVIEW2:
+        try:
+            # Using the helper to load the Streamlit webview with the selected buckets
+            from src.methods import load_streamlit_webview
+            load_streamlit_webview(self.tasks_ctrl, selected_buckets)
+        except Exception:
+            pass
 
 # Method to handle the right click event
 def on_right_click(self, event):
@@ -127,3 +289,15 @@ def load_streamlit_webview(tasks_ctrl, selected_buckets):
     protocol = "https" if g.streamlit_secure else "http"
     url = f"{protocol}://{endpoint}/?embed=true&angular=true&query=5&bucket={buckets_query}"
     tasks_ctrl.LoadURL(url)
+
+# Method to display_learning
+def display_learning(self, files):
+    self.learning_ctrl.DeleteAllItems()  # only remove items
+    for idx, file_name in enumerate(files, start=0):
+        self.learning_ctrl.InsertItem(idx, file_name)
+
+    # Selecting the first item if available
+    if files:
+        g.elearning_index = 0
+        self.learning_ctrl.Select(0)
+        self.learning_ctrl.EnsureVisible(0)

@@ -11,7 +11,6 @@ from src.preferences import on_preferences
 from src.files import (
     on_file_selected,
     on_file_activated,
-    on_learning_ctrl_selected,
     on_delete_file
 )
 from src.learning import (
@@ -19,7 +18,6 @@ from src.learning import (
     on_remove_bucket,
     on_elearning_item_selected,
     on_elearning_item_activated,
-    refresh_learning_ctrl_with_minio,
     on_upload_file_to_minio
 )
 from src.methods import (
@@ -28,7 +26,9 @@ from src.methods import (
     on_about,
     on_contact,
     on_exit,
-    load_streamlit_webview
+    load_streamlit_webview,
+    refresh_ctrls,
+    on_learning_ctrl_selected
 )
 HAS_WEBVIEW2 = False
 try:
@@ -66,14 +66,13 @@ class MyFrame(wx.Frame):
         self.on_about = types.MethodType(on_about, self)
         self.on_contact = types.MethodType(on_contact, self)
         self.on_exit = types.MethodType(on_exit, self)
+        self.refresh_ctrls = types.MethodType(refresh_ctrls, self)
 
         # Methods from `learning.py`
         self.on_elearning_item_selected = types.MethodType(
             on_elearning_item_selected, self)
         self.on_elearning_item_activated = types.MethodType(
             on_elearning_item_activated, self)
-        self.refresh_learning_ctrl_with_minio = types.MethodType(
-            refresh_learning_ctrl_with_minio, self)
         self.on_upload_file_to_minio = types.MethodType(
             on_upload_file_to_minio, self)  # Binding upload method
         self.on_remove_bucket = types.MethodType(
@@ -237,7 +236,10 @@ class MyFrame(wx.Frame):
         self.panel.SetSizer(vbox)
 
         # Refreshing and displaying the learning_ctrl list at startup
-        self.refresh_learning_ctrl_with_minio()
+        self.refresh_ctrls()
+
+        # Listing files in the pre-selected bucket(s)/stage(s) on initial load
+        self.on_learning_ctrl_selected(None)
 
         # Bindings of events
         # Updating the binding to use the multi-selection handler

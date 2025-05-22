@@ -30,6 +30,62 @@ class PreferencesPage(wx.StockPreferencesPage):
         panel = wx.Panel(parent)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
+        # Storage backend selection
+        sizer.Add(wx.StaticText(panel, label="Speicher-Backend auswählen (Snowflake oder MinIO)"), 0, wx.ALL, 5)
+        self.snowflake_checkbox = wx.CheckBox(panel, label="Snowflake verwenden (wenn deaktiviert: MinIO)")
+        self.snowflake_checkbox.SetValue(self.config.ReadBool("snowflake", True))
+        sizer.Add(self.snowflake_checkbox, 0, wx.ALL, 5)
+        self.snowflake_checkbox.Bind(wx.EVT_CHECKBOX, self.on_snowflake_checkbox)
+
+        # Adding preference controls for Snowflake
+        heading_snowflake = wx.StaticText(panel, label="Snowflake Einstellungen")
+        font = heading_snowflake.GetFont()
+        font.PointSize += 2
+        heading_snowflake.SetFont(font)
+        sizer.Add(heading_snowflake, 0, wx.ALL, 5)
+
+        # Snowflake user
+        sizer.Add(wx.StaticText(panel, label="Snowflake User"), 0, wx.ALL, 5)
+        self.snowflake_user_ctrl = wx.TextCtrl(panel, value=self.config.Read("snowflake_user", ""))
+        sizer.Add(self.snowflake_user_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.snowflake_user_ctrl.Bind(wx.EVT_TEXT, self.on_snowflake_user)
+
+        # Snowflake account
+        sizer.Add(wx.StaticText(panel, label="Snowflake Account"), 0, wx.ALL, 5)
+        self.snowflake_account_ctrl = wx.TextCtrl(panel, value=self.config.Read("snowflake_account", ""))
+        sizer.Add(self.snowflake_account_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.snowflake_account_ctrl.Bind(wx.EVT_TEXT, self.on_snowflake_account)
+
+        # Snowflake warehouse
+        sizer.Add(wx.StaticText(panel, label="Snowflake Warehouse"), 0, wx.ALL, 5)
+        self.snowflake_warehouse_ctrl = wx.TextCtrl(panel, value=self.config.Read("snowflake_warehouse", ""))
+        sizer.Add(self.snowflake_warehouse_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.snowflake_warehouse_ctrl.Bind(wx.EVT_TEXT, self.on_snowflake_warehouse)
+
+        # Snowflake database
+        sizer.Add(wx.StaticText(panel, label="Snowflake Database"), 0, wx.ALL, 5)
+        self.snowflake_database_ctrl = wx.TextCtrl(panel, value=self.config.Read("snowflake_database", ""))
+        sizer.Add(self.snowflake_database_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.snowflake_database_ctrl.Bind(wx.EVT_TEXT, self.on_snowflake_database)
+
+        # Snowflake schema
+        sizer.Add(wx.StaticText(panel, label="Snowflake Schema"), 0, wx.ALL, 5)
+        self.snowflake_schema_ctrl = wx.TextCtrl(panel, value=self.config.Read("snowflake_schema", ""))
+        sizer.Add(self.snowflake_schema_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.snowflake_schema_ctrl.Bind(wx.EVT_TEXT, self.on_snowflake_schema)
+
+        # Snowflake role
+        sizer.Add(wx.StaticText(panel, label="Snowflake Role"), 0, wx.ALL, 5)
+        self.snowflake_role_ctrl = wx.TextCtrl(panel, value=self.config.Read("snowflake_role", ""))
+        sizer.Add(self.snowflake_role_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.snowflake_role_ctrl.Bind(wx.EVT_TEXT, self.on_snowflake_role)
+
+        # Snowflake private key file
+        sizer.Add(wx.StaticText(panel, label="Snowflake Private Key File (Pfad)"), 0, wx.ALL, 5)
+        self.snowflake_private_key_file_ctrl = wx.TextCtrl(panel, value=self.config.Read("snowflake_private_key_file", ""))
+        sizer.Add(self.snowflake_private_key_file_ctrl, 0, wx.ALL | wx.EXPAND, 5)
+        self.snowflake_private_key_file_ctrl.Bind(wx.EVT_TEXT, self.on_snowflake_private_key_file)
+
         # Adding preference controls for MinIO
         heading_minio = wx.StaticText(panel, label="MinIO Einstellungen")
         font = heading_minio.GetFont()
@@ -91,6 +147,39 @@ class PreferencesPage(wx.StockPreferencesPage):
         # Setting the sizer for the panel
         panel.SetSizer(sizer)
         return panel
+
+    # Snowflake handlers
+    def on_snowflake_checkbox(self, event):
+        self.config.WriteBool("snowflake", self.snowflake_checkbox.IsChecked())
+        self.config.Flush()
+        
+    def on_snowflake_user(self, event):
+        self.config.Write("snowflake_user", self.snowflake_user_ctrl.GetValue())
+        self.config.Flush()
+
+    def on_snowflake_account(self, event):
+        self.config.Write("snowflake_account", self.snowflake_account_ctrl.GetValue())
+        self.config.Flush()
+
+    def on_snowflake_warehouse(self, event):
+        self.config.Write("snowflake_warehouse", self.snowflake_warehouse_ctrl.GetValue())
+        self.config.Flush()
+
+    def on_snowflake_database(self, event):
+        self.config.Write("snowflake_database", self.snowflake_database_ctrl.GetValue())
+        self.config.Flush()
+
+    def on_snowflake_schema(self, event):
+        self.config.Write("snowflake_schema", self.snowflake_schema_ctrl.GetValue())
+        self.config.Flush()
+
+    def on_snowflake_role(self, event):
+        self.config.Write("snowflake_role", self.snowflake_role_ctrl.GetValue())
+        self.config.Flush()
+
+    def on_snowflake_private_key_file(self, event):
+        self.config.Write("snowflake_private_key_file", self.snowflake_private_key_file_ctrl.GetValue())
+        self.config.Flush()
 
     # Adding MinIO endpoint handler
     def on_minio_endpoint(self, event):
