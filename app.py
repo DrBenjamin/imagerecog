@@ -8,7 +8,7 @@ import asyncio
 import io
 from PIL import Image
 from src.client import MCPClient
-from typing import Union
+from typing import Union, Dict, Any
 import json
 import streamlit as st
 import logging
@@ -35,15 +35,14 @@ try:
 except:
     st.session_state.query = 0
 
-# Initializing a single global MCPClient and connect
+# Initializing a single global MCPClient
 _mcp_client = MCPClient()
-
-# Ensuring we connect to the proper SSE endpoint
-mcp_base_url = st.secrets["MCP"]["MCP_URL"].rstrip("/")
-sse_url = f"{mcp_base_url}/sse"
 
 # Creating persistent event loop for MCP client
 _mcp_loop = asyncio.new_event_loop()
+
+# Tool to MCP server mapping (populated during connection)
+_tool_server_map = {}
 
 
 # Function to suppress async errors
@@ -61,16 +60,57 @@ logging.getLogger("anyio").setLevel(logging.ERROR)
 
 threading.Thread(target=_mcp_loop.run_forever, daemon=True).start()
 
-# Connecting to SSE server on persistent loop and waiting for connection
+# Ensuring we connect to the proper primary SSE endpoint
+primary_mcp_base_url = st.secrets["MCP"]["MCP_URL"].rstrip("/")
+primary_sse_url = f"{primary_mcp_base_url}/sse"
+
+# Connect to primary MCP server
 connect_future = asyncio.run_coroutine_threadsafe(
-    _mcp_client.connect_to_sse_server(server_url=sse_url),
+    _mcp_client.connect_to_sse_server(server_url=primary_sse_url, is_primary=True),
     _mcp_loop
 )
 try:
     # Blocking until the MCP client session is ready
-    connect_future.result(timeout=10000)
+    primary_tools = connect_future.result(timeout=10000)
+    # Map each tool to this server for routing
+    if primary_tools:
+        for tool in primary_tools.split(", "):
+            _tool_server_map[tool] = "primary"
 except Exception as e:
-    st.error(f"Failed to connect to MCP server: {e}")
+    st.error(f"Failed to connect to primary MCP server: {e}")
+
+# Connect to any remote MCP servers if configured
+if "REMOTE_MCP_SERVERS" in st.secrets["MCP"]:
+    remote_servers = st.secrets["MCP"]["REMOTE_MCP_SERVERS"]
+    if isinstance(remote_servers, dict):
+        for server_name, server_url in remote_servers.items():
+            remote_url = server_url.rstrip("/")
+            remote_sse_url = f"{remote_url}/sse"
+            
+            remote_connect_future = asyncio.run_coroutine_threadsafe(
+                _mcp_client.connect_to_sse_server(server_url=remote_sse_url, is_primary=False),
+                _mcp_loop
+            )
+            try:
+                remote_tools = remote_connect_future.result(timeout=10000)
+                # Map each tool to this remote server for routing
+                if remote_tools:
+                    for tool in remote_tools.split(", "):
+                        _tool_server_map[tool] = remote_url
+            except Exception as e:
+                st.error(f"Failed to connect to remote MCP server {server_name}: {e}")
+
+
+# Function to get the appropriate session for a tool
+def _get_session_for_tool(tool_name: str):
+    if tool_name in _tool_server_map:
+        server_key = _tool_server_map[tool_name]
+        if server_key == "primary":
+            return _mcp_client.primary_session
+        else:
+            return _mcp_client.remote_sessions.get(server_key)
+    # Default to primary session if tool not found in map
+    return _mcp_client.primary_session
 
 
 # Function to call the MCP tool
@@ -86,11 +126,15 @@ def call_mcp_tool_image_recognition(tool_input: Union[str, bytes]) -> tuple[str,
         payload = base64.b64encode(tool_input).decode("utf-8")
     else:
         payload = tool_input
+    
     async def _invoke():
         print(f"Calling MCP tool with input...")
+        
+        # Get the appropriate session
+        session = _get_session_for_tool("image_recognition")
 
         # Using correct parameter name matching server-side image_recognition signature
-        result = await _mcp_client.session.call_tool(
+        result = await session.call_tool(
             "image_recognition", {"image_bytes": payload}
         )
         print(f"Received MCP tool result!")
@@ -114,14 +158,21 @@ def call_mcp_tool_image_recognition(tool_input: Union[str, bytes]) -> tuple[str,
 def call_mcp_generic(input: str, params: dict={}) -> str:
     """Calling an MCP resource or prompt by name with given parameters and return its text output."""
     async def _invoke():
+        # Select the appropriate session based on the operation
+        session = _mcp_client.primary_session  # Default to primary
+        
+        # For tool-based operations, try to route to the appropriate server
+        if "review_code" in input:
+            session = _get_session_for_tool("review_code")
+        
         # Using `read_resource` for URIs with scheme and `get_prompt` for prompts
         if "Static image file" in input:
-            result = await _mcp_client.session.read_resource("resource://Image.png")
+            result = await session.read_resource("resource://Image.png")
         elif "Variable image file" in input:
             uri = f"resource://{params.get('image', '')}"
-            result = await _mcp_client.session.read_resource(uri)
+            result = await session.read_resource(uri)
         else:
-            result = await _mcp_client.session.get_prompt(input, params)
+            result = await session.get_prompt(input, params)
         return result
     execution = asyncio.run_coroutine_threadsafe(_invoke(), _mcp_loop).result()
 

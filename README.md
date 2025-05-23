@@ -75,6 +75,11 @@ MCP_URL = "http://127.0.0.1:8080"
 MCP_SYSTEM_PROMPT = "<system prompt for image recognition>"
 MCP_USER_PROMPT = "<user prompt for image recognition>"
 
+# Remote MCP servers configuration (optional)
+[MCP.REMOTE_MCP_SERVERS]
+RemoteMCP1 = "http://external-server1:8080"
+RemoteMCP2 = "http://external-server2:8080"
+
 # Ollama API
 [OLLAMA]
 OLLAMA_URL = "http://127.0.0.1:11434"
@@ -143,6 +148,33 @@ Test bytes for an image to test on MCP Inspector (running on
 
 or use the Streamlit app running on [http://localhost:8501](http://localhost:8501)
 to upload an image and test it.
+
+### Remote MCP Tools
+
+BenBox supports connecting to multiple MCP servers simultaneously, allowing you to use remotely hosted MCP tools. This enhances flexibility by enabling:
+
+1. **Distributed Tool Hosting**: Run specialized tools on dedicated servers optimized for specific tasks (e.g., GPU servers for image processing)
+2. **Service Integration**: Connect to third-party services that expose MCP-compatible interfaces
+3. **Scalability**: Distribute tool workloads across multiple servers to handle increased demand
+
+To use remote MCP tools:
+
+1. Configure remote servers in `.streamlit/st.secrets.toml`:
+   ```ini
+   [MCP.REMOTE_MCP_SERVERS]
+   RemoteServer1 = "http://external-server1:8080"
+   RemoteServer2 = "http://external-server2:8080"
+   ```
+
+2. Start the application normally with `streamlit run app.py`
+
+3. The application automatically:
+   - Connects to all configured MCP servers
+   - Discovers available tools on each server
+   - Routes tool calls to the appropriate server based on tool availability
+   - Handles communication transparently for the user
+
+Note: Security for self-hosted MCP servers is not implemented in this version. When deploying in production, consider adding authentication mechanisms to secure your MCP endpoints.
 
 ### Mobile App
 
