@@ -11,3 +11,4 @@ fastmcp
 dotenv
 ollama
 openai
+snowflake-connector-python

@@ -120,6 +120,10 @@ def call_mcp_generic(input: str, params: dict={}) -> str:
         elif "Variable image file" in input:
             uri = f"resource://{params.get('image', '')}"
             result = await _mcp_client.session.read_resource(uri)
+        elif "create_vector_content" in input:
+            result = await _mcp_client.session.call_tool(
+                "create_vector_content", params
+            )
         else:
             result = await _mcp_client.session.get_prompt(input, params)
         return result
@@ -148,7 +152,7 @@ def call_mcp_generic(input: str, params: dict={}) -> str:
 # Menu
 func_choice = st.selectbox(
     "Select MCP function",
-    ("🌌 Static Image", "🏞️ Variable Image", "💻 Review Code", "🩻 Image Recognition"),
+    ("🌌 Static Image", "🏞️ Variable Image", "💻 Review Code", "🩻 Image Recognition", "📤 Erstelle neue Inhalte"),
     index=st.session_state.query if st.session_state.query else 0,
 )
 
@@ -193,6 +197,39 @@ elif func_choice == "💻 Review Code":
             feedback = call_mcp_generic("review_code", {"code": code_input})
         st.write("**Review Feedback:**")
         st.code(feedback)
+
+elif func_choice == "📤 Erstelle neue Inhalte":
+    st.title("📤 Erstelle neue Inhalte")
+    st.write("Upload files to create vectors in the Snowflake vector store")
+    
+    uploaded_file = st.file_uploader(
+        "Upload a file to store in Snowflake", 
+        type=["txt", "pdf", "docx", "csv", "json", "md"]
+    )
+    
+    if uploaded_file:
+        file_content = uploaded_file.read()
+        file_name = uploaded_file.name
+        
+        if st.button("Save to Vector Store"):
+            with st.spinner("Uploading to Snowflake vector store..."):
+                # Convert file content to base64 for transmission
+                encoded_content = base64.b64encode(file_content).decode("utf-8")
+                
+                # Call the MCP tool we created
+                response = call_mcp_generic("create_vector_content", {
+                    "file_content": encoded_content,
+                    "file_name": file_name
+                })
+                
+                try:
+                    result = json.loads(response)
+                    if result.get("success"):
+                        st.success(result.get("message", "File uploaded successfully!"))
+                    else:
+                        st.error(result.get("message", "Failed to upload file."))
+                except:
+                    st.error(f"Error processing response: {response}")
 
 else:  # Image Recognition
     st.title("🩻 Image Recognition")

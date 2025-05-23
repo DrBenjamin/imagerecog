@@ -23,3 +23,4 @@ from . import get_static_image
 from . import get_variable_image
 from . import review_code
 from . import image_recognition
+from . import snowflake_integration
