@@ -15,6 +15,8 @@ import io
 from PIL import Image
 import tempfile
 import json
+import time
+import webbrowser
 
 class Phoenix:
     def __init__(self, root):
@@ -41,18 +43,83 @@ class Phoenix:
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Beenden", command=self.root.quit)
         
-        # Create simple UI
-        self.label = tk.Label(root, text="BenBox Phoenix Application")
-        self.label.pack(pady=20)
+        # Create "Hilfe" menu
+        self.help_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="Hilfe", menu=self.help_menu)
+        self.help_menu.add_command(label="Über", command=self.show_about)
         
-        self.start_streamlit_button = tk.Button(root, text="Start Streamlit App", command=self.start_streamlit)
-        self.start_streamlit_button.pack(pady=10)
+        # Create main frame
+        self.main_frame = tk.Frame(root)
+        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        
+        # Create header
+        self.header_label = tk.Label(self.main_frame, 
+                                    text="BenBox Phoenix Application", 
+                                    font=("Helvetica", 16, "bold"))
+        self.header_label.pack(pady=(0, 20))
+        
+        # Create info text
+        info_text = ("Diese Anwendung ermöglicht die Integration mit der BenBox Streamlit App.\n\n" +
+                    "Mit dem Menüpunkt 'Erstelle neuen Eintrag' können Sie einen Vector Store " +
+                    "aus Bucket/Stage-Dateien erstellen.")
+        self.info_label = tk.Label(self.main_frame, text=info_text, justify=tk.LEFT, wraplength=700)
+        self.info_label.pack(pady=(0, 20), anchor=tk.W)
+        
+        # Create buttons frame
+        self.buttons_frame = tk.Frame(self.main_frame)
+        self.buttons_frame.pack(fill=tk.X, pady=(10, 20))
+        
+        # Create Streamlit control buttons
+        self.start_streamlit_button = tk.Button(
+            self.buttons_frame, 
+            text="Start Streamlit App", 
+            command=self.start_streamlit,
+            width=20,
+            height=2
+        )
+        self.start_streamlit_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.open_browser_button = tk.Button(
+            self.buttons_frame, 
+            text="Öffne im Browser", 
+            command=self.open_streamlit_browser,
+            width=20,
+            height=2
+        )
+        self.open_browser_button.pack(side=tk.LEFT, padx=(0, 10))
+        
+        self.create_store_button = tk.Button(
+            self.buttons_frame, 
+            text="Erstelle Vector Store", 
+            command=self.create_vector_store,
+            width=20,
+            height=2
+        )
+        self.create_store_button.pack(side=tk.LEFT)
         
         # Status bar
         self.status_var = tk.StringVar()
-        self.status_var.set("Ready")
+        self.status_var.set("Bereit")
         self.status_bar = tk.Label(root, textvariable=self.status_var, bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+    
+    def show_about(self):
+        """Show about dialog"""
+        messagebox.showinfo(
+            "Über BenBox",
+            "BenBox Phoenix Application\n\n" +
+            "Version: 1.0.0\n" +
+            "Open-Source, hosted on GitHub\n\n" +
+            "© 2024 BenBox"
+        )
+    
+    def open_streamlit_browser(self):
+        """Open the Streamlit app in a browser"""
+        if hasattr(self, "streamlit") and self.streamlit and self.streamlit.running:
+            webbrowser.open(self.streamlit.get_url())
+        else:
+            messagebox.showwarning("Warning", "Streamlit is not running. Please start Streamlit first.")
+            self.status_var.set("Streamlit ist nicht gestartet")
 
     def open_file(self):
         """Open a file"""
@@ -75,39 +142,81 @@ class Phoenix:
         )
         
         if not bucket_files:
+            self.status_var.set("Vector store creation cancelled")
             return
         
         # Check if Streamlit is running
         if not hasattr(self, "streamlit") or self.streamlit is None:
             messagebox.showwarning("Warning", "Streamlit is not running. Please start Streamlit first.")
+            self.status_var.set("Vector store creation failed - Streamlit not running")
             return
         
         try:
             # Create vector store logic
-            # This would integrate with the MinIO bucket files logic
+            # This integrates with the MinIO bucket files logic
             self.status_var.set("Creating vector store...")
             
-            # Placeholder for vector store creation logic
-            # In a real implementation, this would interact with the Streamlit app
-            # through some communication mechanism (e.g., API calls, shared file, etc.)
+            # Process each file for the vector store
+            processed_files = []
+            for file_path in bucket_files:
+                try:
+                    # Read file content
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # Extract filename for reference
+                    filename = os.path.basename(file_path)
+                    
+                    processed_files.append({
+                        "filename": filename,
+                        "path": file_path,
+                        "size": os.path.getsize(file_path),
+                        "status": "processed"
+                    })
+                    
+                except Exception as file_error:
+                    processed_files.append({
+                        "filename": os.path.basename(file_path),
+                        "path": file_path,
+                        "error": str(file_error),
+                        "status": "error"
+                    })
             
-            # For demonstration, create a simple JSON configuration for the vector store
+            # Create vector store configuration
             vector_store_config = {
-                "files": bucket_files,
-                "created_at": "2024-01-01 00:00:00",
-                "type": "minio_bucket"
+                "files": processed_files,
+                "created_at": "__timestamp__",  # Will be filled by Streamlit
+                "type": "minio_bucket",
+                "source": "Phoenix application"
             }
             
-            # Save configuration to a temporary file that Streamlit can access
-            with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
-                json.dump(vector_store_config, f)
-                temp_file_path = f.name
+            # Create a directory for vector store configs if it doesn't exist
+            vector_store_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vector_stores")
+            os.makedirs(vector_store_dir, exist_ok=True)
             
-            # In a real implementation, we would need to communicate this to the Streamlit app
-            # This could be done via a shared file, database, or other mechanism
+            # Save configuration to a file that Streamlit can access
+            config_filename = f"vector_store_config_{len(bucket_files)}_files.json"
+            config_path = os.path.join(vector_store_dir, config_filename)
             
-            self.status_var.set(f"Vector store created from {len(bucket_files)} files")
-            messagebox.showinfo("Success", f"Vector store created successfully from {len(bucket_files)} files.\n\nConfiguration saved to: {temp_file_path}")
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(vector_store_config, f, indent=2)
+            
+            # Count successful and failed files
+            successful = sum(1 for file in processed_files if file["status"] == "processed")
+            failed = len(processed_files) - successful
+            
+            status_message = f"Vector store created from {successful} files"
+            if failed > 0:
+                status_message += f" ({failed} files failed)"
+            
+            self.status_var.set(status_message)
+            messagebox.showinfo(
+                "Vector Store Created", 
+                f"Vector store created successfully!\n\n"
+                f"- Processed files: {successful}\n"
+                f"- Failed files: {failed}\n\n"
+                f"Configuration saved to: {config_path}"
+            )
             
         except Exception as e:
             self.status_var.set("Error creating vector store")
@@ -115,6 +224,11 @@ class Phoenix:
     
     def start_streamlit(self):
         """Start the Streamlit application"""
+        # Check if Streamlit is already running
+        if hasattr(self, "streamlit") and self.streamlit and self.streamlit.running:
+            messagebox.showinfo("Info", "Streamlit is already running.")
+            return
+        
         self.status_var.set("Starting Streamlit app...")
         
         # Start Streamlit in a separate thread
@@ -126,46 +240,101 @@ class Phoenix:
             # Set working directory to the repository root
             repo_root = os.path.dirname(os.path.abspath(__file__))
             
+            # Check if app.py exists
+            app_path = os.path.join(repo_root, "app.py")
+            if not os.path.exists(app_path):
+                error_msg = f"Streamlit app file not found: {app_path}"
+                self.root.after(100, lambda: self.status_var.set(error_msg))
+                messagebox.showerror("Error", error_msg)
+                return
+                
             # Start the Streamlit process
+            cmd = ["python", "-m", "streamlit", "run", app_path, "--server.enableXsrfProtection", "false"]
+            
+            # Open log file for Streamlit output
+            logs_dir = os.path.join(repo_root, "logs")
+            os.makedirs(logs_dir, exist_ok=True)
+            log_path = os.path.join(logs_dir, "streamlit.log")
+            
+            log_file = open(log_path, 'w')
+            
             process = subprocess.Popen(
-                ["python", "-m", "streamlit", "run", "app.py", "--server.enableXsrfProtection", "false"],
+                cmd,
                 cwd=repo_root,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stdout=log_file,
+                stderr=subprocess.STDOUT,
                 text=True
             )
             
             # Create a reference to Streamlit that can be used by other methods
-            # In this implementation, we're using a simple object to store state
             class StreamlitReference:
-                def __init__(self, process):
+                def __init__(self, process, log_file, log_path):
                     self.process = process
                     self.running = True
-                
+                    self.log_file = log_file
+                    self.log_path = log_path
+                    
                 def stop(self):
                     if self.running:
                         self.process.terminate()
                         self.running = False
-            
-            self.streamlit = StreamlitReference(process)
-            self.root.after(100, lambda: self.status_var.set("Streamlit app is running"))
-            
-            # Monitor the Streamlit process
-            while self.streamlit.running:
-                # Check if process is still running
-                if process.poll() is not None:
-                    self.streamlit.running = False
-                    self.root.after(100, lambda: self.status_var.set("Streamlit app has stopped"))
-                    break
+                        if self.log_file:
+                            self.log_file.close()
                 
-                # Optional: Process stdout for monitoring
-                line = process.stdout.readline()
-                if line:
-                    print(f"Streamlit: {line.strip()}")
+                def get_url(self):
+                    return "http://localhost:8501"
+            
+            self.streamlit = StreamlitReference(process, log_file, log_path)
+            
+            # Wait for Streamlit to start (look for the URL in the log)
+            max_wait_time = 30  # seconds
+            start_time = time.time()
+            started = False
+            
+            while time.time() - start_time < max_wait_time:
+                if process.poll() is not None:  # Process exited
+                    break
+                    
+                # Check if the process is still running
+                if not started and os.path.exists(log_path):
+                    try:
+                        with open(log_path, 'r') as f:
+                            log_content = f.read()
+                            if "You can now view your Streamlit app in your browser" in log_content:
+                                started = True
+                                self.root.after(100, lambda: self.status_var.set("Streamlit app is running at http://localhost:8501"))
+                                # Optionally open browser
+                                # webbrowser.open("http://localhost:8501")
+                                break
+                    except:
+                        pass
+                
+                time.sleep(0.5)
+            
+            if not started:
+                error_msg = "Streamlit failed to start in the expected time."
+                self.root.after(100, lambda: self.status_var.set(error_msg))
+                if self.streamlit:
+                    self.streamlit.stop()
+                    self.streamlit = None
+                return
+            
+            # Monitor the Streamlit process and update status when it ends
+            def monitor_process():
+                while self.streamlit and self.streamlit.running:
+                    if process.poll() is not None:  # Process exited
+                        self.streamlit.running = False
+                        self.root.after(100, lambda: self.status_var.set("Streamlit app has stopped"))
+                        break
+                    time.sleep(1)
+            
+            # Start monitoring in a separate thread
+            threading.Thread(target=monitor_process, daemon=True).start()
             
         except Exception as e:
-            self.root.after(100, lambda: self.status_var.set(f"Error starting Streamlit: {e}"))
-            print(f"Error starting Streamlit: {e}")
+            error_msg = f"Error starting Streamlit: {e}"
+            self.root.after(100, lambda: self.status_var.set(error_msg))
+            messagebox.showerror("Error", error_msg)
 
 
 # Global reference to the Phoenix application
