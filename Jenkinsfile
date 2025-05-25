@@ -27,7 +27,7 @@ pipeline {
                 // Using local repo and update it
                 sh '''
                     cd /home/jenkins/BenBox
-                    git pull origin v0.2.0
+                    git pull origin main
                 '''
             }
         }
