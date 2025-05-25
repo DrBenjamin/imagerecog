@@ -5,5 +5,7 @@
   <button (click)="loadQuery(2)">Review Code</button>
   <button (click)="loadQuery(3)">Image Recognition</button>
   <button (click)="loadRagOnSnow()">Rag on Snow</button>
+  <button (click)="toggleMetrics()">Show Metrics</button>
 </div>
 <iframe *ngIf="urlSafe" [src]="urlSafe" class="full-frame"></iframe>
+<app-metrics-dashboard *ngIf="showMetrics"></app-metrics-dashboard>
