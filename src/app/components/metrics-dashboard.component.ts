@@ -80,7 +80,7 @@ import { AnalyticsService } from '../services/analytics.service';
           <div class="vital-metric">
             <span class="vital-label">CLS</span>
             <span class="vital-value">
-              {{ cls !== null ? cls.toFixed(3) : 'N/A' }}
+              {{ cls !== null && cls !== undefined ? cls.toFixed(3) : 'N/A' }}
             </span>
           </div>
         </div>
@@ -384,8 +384,8 @@ export class MetricsDashboardComponent implements OnInit, OnDestroy {
       // Get recent events
       const allEvents = this.analytics.getEvents() || [];
       this.recentEvents = allEvents.slice(-5).reverse();
-    } catch (error) {
-      console.warn('Error refreshing metrics:', error);
+    } catch (error: any) {
+      console.warn('Error refreshing metrics:', error instanceof Error ? error.message : 'Unknown error');
       // Set safe default values
       this.performanceScore = 0;
       this.loadTime = 0;
@@ -402,7 +402,7 @@ export class MetricsDashboardComponent implements OnInit, OnDestroy {
   exportData(): void {
     try {
       const data = this.appMonitoring.exportMonitoringData();
-      if (!data) {
+      if (data === undefined || data === null || data === '') {
         console.warn('No monitoring data available for export');
         return;
       }
@@ -415,8 +415,8 @@ export class MetricsDashboardComponent implements OnInit, OnDestroy {
         a.click();
       }
       URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error exporting data:', error);
+    } catch (error: any) {
+      console.error('Error exporting data:', error instanceof Error ? error.message : 'Unknown error');
     }
   }
 
@@ -463,7 +463,7 @@ export class MetricsDashboardComponent implements OnInit, OnDestroy {
   }
 
   formatBytes(bytes: number | null | undefined): string {
-    if (!bytes || bytes === 0) return '0 B';
+    if (bytes === null || bytes === undefined || isNaN(bytes) || bytes === 0) return '0 B';
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -471,7 +471,7 @@ export class MetricsDashboardComponent implements OnInit, OnDestroy {
   }
 
   formatDuration(ms: number | null | undefined): string {
-    if (!ms || ms === 0) return '0s';
+    if (ms === null || ms === undefined || isNaN(ms) || ms === 0) return '0s';
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
@@ -486,7 +486,7 @@ export class MetricsDashboardComponent implements OnInit, OnDestroy {
   }
 
   formatEventTime(timestamp: number | null | undefined): string {
-    if (!timestamp) return 'Unknown';
+    if (timestamp === null || timestamp === undefined || isNaN(timestamp)) return 'Unknown';
     const now = Date.now();
     const diff = now - timestamp;
     const seconds = Math.floor(diff / 1000);

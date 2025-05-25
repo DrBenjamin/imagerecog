@@ -266,16 +266,22 @@ export class AppMonitoringService {
 
   // Export comprehensive monitoring data
   exportMonitoringData(): string {
-    const report = this.generateMonitoringReport();
-    const performanceScore = this.getPerformanceScore();
-    
-    const exportData = {
-      ...report,
-      performanceScore,
-      exportTimestamp: new Date().toISOString()
-    };
+    try {
+      const report = this.generateMonitoringReport();
+      const performanceScore = this.getPerformanceScore();
+      
+      const exportData = {
+        ...report,
+        performanceScore,
+        exportTimestamp: new Date().toISOString()
+      };
 
-    return JSON.stringify(exportData, null, 2);
+      return JSON.stringify(exportData, null, 2);
+    } catch (error: any) {
+      console.warn('Error exporting monitoring data:', error instanceof Error ? error.message : 'Unknown error');
+      // Return a safe empty string instead of undefined
+      return '{"error": "Failed to export data", "timestamp": "' + new Date().toISOString() + '"}';
+    }
   }
 
   // Clear all monitoring data
