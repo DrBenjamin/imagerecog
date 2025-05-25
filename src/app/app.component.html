@@ -1,11 +1,41 @@
-<div *ngIf="buttonsVisible" class="controls">
-  <p></p><p></p>
-  <button (click)="loadQuery(0)">Country Code Lookup</button>
-  <button (click)="loadQuery(1)">Static Image</button>
-  <button (click)="loadQuery(2)">Variable Image</button>
-  <button (click)="loadQuery(3)">Review Code</button>
-  <button (click)="loadQuery(4)">Image Recognition</button>
-  <button (click)="loadQuery(5)">Navigator</button>
-  <button (click)="loadQuery(6)">OpenAI Agents</button>
+<!-- Header -->
+<div class="app-header">
+  <h1>🔍 BenBox Performance Monitoring</h1>
+  <p>Real-time performance monitoring with Core Web Vitals tracking</p>
 </div>
+
+<!-- Main controls section -->
+<div class="controls" *ngIf="buttonsVisible">
+  <div class="button-grid">
+    <button (click)="loadQuery(0)">Country Code Lookup</button>
+    <button (click)="loadQuery(1)">Static Image</button>
+    <button (click)="loadQuery(2)">Variable Image</button>
+    <button (click)="loadQuery(3)">Review Code</button>
+    <button (click)="loadQuery(4)">Image Recognition</button>
+    <button (click)="loadQuery(5)">Navigator</button>
+    <button (click)="loadQuery(6)">OpenAI Agents</button>
+  </div>
+  
+  <!-- Monitoring Controls -->
+  <div class="monitoring-controls">
+    <h4>🔍 Monitoring Controls</h4>
+    <div class="button-grid">
+      <button (click)="showPerformanceSummary()" class="btn-success">Performance Summary</button>
+      <button (click)="getPerformanceScore()" class="btn-warning">Performance Score</button>
+      <button (click)="exportMonitoringData()" class="btn-info">Export Data</button>
+    </div>
+    
+    <h4>🎭 Demo & Testing</h4>
+    <div class="button-grid">
+      <button (click)="generateDemoData()" class="btn-purple">Generate Demo Data</button>
+      <button (click)="simulateUserSession()" class="btn-pink">Simulate Session</button>
+      <button (click)="clearDemoData()" class="btn-orange">Clear Demo Data</button>
+    </div>
+  </div>
+</div>
+
+<!-- Iframe content -->
 <iframe *ngIf="urlSafe" [src]="urlSafe" class="full-frame"></iframe>
+
+<!-- Metrics Dashboard -->
+<app-metrics-dashboard></app-metrics-dashboard>
